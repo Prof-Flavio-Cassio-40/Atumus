@@ -1618,6 +1618,7 @@ tr:hover td{background:#f8faff}
 </div>
 
 <script>
+
 // ── Global variables ──
 var CU = null;          // Current user
 var voiceGen = 'f';     // Voice gender
@@ -1637,6 +1638,22 @@ var _calDate = new Date();
 var bolDisc = 'Ciências';
 var voiceGen = 'f';
 
+
+
+// ── fmt and nc at TOP — must be defined before use ──
+function fmt(v) {
+  return (v !== null && v !== undefined && v !== '' && !isNaN(parseFloat(v)))
+    ? parseFloat(v).toFixed(1) : '—';
+}
+function nc(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return '';
+  if (n >= 9) return '<span style="color:var(--g);font-weight:800">' + n.toFixed(1) + '</span>';
+  if (n >= 7) return '<span style="color:var(--y);font-weight:800">' + n.toFixed(1) + '</span>';
+  return '<span style="color:var(--r);font-weight:800">' + n.toFixed(1) + '</span>';
+}
+window.fmt = fmt;
+window.nc = nc;
 
 
 const SB = {
@@ -5424,6 +5441,7 @@ function showToast(msg, type) {
   t._tm = setTimeout(() => t.style.opacity = '0', 3000);
 }
 window.showToast = showToast;
+
 
 
 
