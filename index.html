@@ -500,6 +500,81 @@ tr:hover td{background:#f8faff}
 
 
 
+<script>
+
+// ═══ GLOBAL PROXY — catches onclick calls before JS loads ═══
+(function() {
+  var _pending = {};
+  var _handler = function(name) {
+    return function() {
+      var args = arguments;
+      if (window[name] && typeof window[name] === 'function') {
+        window[name].apply(this, args);
+      } else {
+        // Queue it for after load
+        if (!_pending[name]) _pending[name] = [];
+        _pending[name].push(args);
+      }
+    };
+  };
+
+  // Pre-define all onclick functions as proxies
+  var fns = ['showAP','doAuth','doForgot','doReset','doLogout',
+    'finCadA','finCadP','switchMT','switchPT','showCS','showPA',
+    'openTM','closeTM','openPCD','closePCD','backPCD','toggleMode',
+    'toggleUnit','toggleSB','togglePass','setN','closeN',
+    'aNext','aBack','initLig','initCW','checkLig','checkArr',
+    'resetArr','selLig','typeCW','checkCW','selColor','psvg',
+    'renderQz','selAns','nxtQ','finQ','tutStep','renderLigSet',
+    'spk','playAud','saveLink','saveBook','trigUp','saveUp',
+    'setBolDisc','setBolUnit','saveNota','savePf','calNav',
+    'tShowModule','tOpenModal','tCloseModal','tViewAluno',
+    'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI',
+    'tOpenPEIForm','tOpenPEIForAluno','tSaveAtividade',
+    'tSaveAviso','tShowAvisoDetalhe','tSendMsg','tGerarRelatorio',
+    'tSaveProfConfig','tSaveElevenLabs','tElTestar','tElTesteDirecto',
+    'tElLimpar','tSaveMaterial','tDelMaterial','tAbrirNovaTurma',
+    'tSalvarTurma','tSalvarPlano','tVerPlanos','tRenderFreqRelatorio',
+    'tAbrirChatResponsavel','tEnviarMsgResp',
+    'gerarAtividadesPEI','enviarWhatsApp','compartilharRede',
+    'delLink','delBook','resetPin','selM','ansM',
+    '_showCloudConfig','_doSbSave','_sbDisconnect',
+    '_elLoadUserVoices','_debugShowUsers',
+    'tMarkNotaDirty','tFilterAlunos','tUpdProfPhoto',
+    'tRenderNotasTurma','tRenderFreq','tRenderAtividades',
+    'tRenderMateriais','tLoadChat','tSaveFreq','tSendMsg',
+    'handleSrch','handleUp','maskPhone','calcAge','checkStr',
+    'prevPhoto','updPavPhoto','upPEI','savePEI',
+    'tLoadPEIAluno','tWhatsResp','showAvisoDetalhe',
+    'initArr','initTut','renderTut','tRenderAlunosTable',
+    'tLoadNotasTurmas','tLoadFreqTurmas','tLoadComunicacao',
+    'tLoadConfig','tLoadDashboard','tLoadAlunos','tLoadPEI',
+    'tLoadTurmas','compartilharAviso','enviarWhatsAppResponsavel'
+  ];
+
+  fns.forEach(function(name) {
+    if (!window[name]) {
+      window[name] = _handler(name);
+    }
+  });
+
+  // After DOM loads, flush pending calls
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      Object.keys(_pending).forEach(function(name) {
+        if (window[name] && typeof window[name] === 'function') {
+          _pending[name].forEach(function(args) {
+            window[name].apply(null, args);
+          });
+        }
+      });
+      _pending = {};
+    }, 100);
+  });
+})();
+
+
+</script>
 </head>
 <body>
 <!-- AUTH SCREEN -->
