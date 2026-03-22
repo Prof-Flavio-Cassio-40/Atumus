@@ -409,7 +409,8 @@ tr:hover td{background:#f8faff}
 .mit.bad{border-color:var(--r);background:var(--rl)}
 .cw-cell{width:36px;height:36px;border:2.5px solid #cbd5e1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;text-transform:uppercase;background:#fff;cursor:pointer;transition:all .18s;font-family:var(--fd)}
 .cw-cell.ac{border-color:var(--v);background:var(--vl)}
-.cw-cell.ok{background:var(--gl);border-color:var(--g);color:var(--g);animation:pop .3s ease}
+.cw-cell.ok{background:var(--g);border-color:var(--g);color:#fff;animation:pop .3s ease}
+.cw-cell.err{background:var(--r);border-color:var(--r);color:#fff;animation:pop .3s ease}
 @keyframes pop{0%{transform:scale(.8)}100%{transform:scale(1)}}
 .cw-cell.blk{background:#1e293b;border-color:#1e293b;cursor:default}
 .cp{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:8px}
@@ -900,7 +901,7 @@ tr:hover td{background:#f8faff}
   <div class="tmod" id="tPlanejamento">
    <div class="tmod-title">🗓️ Planejamento de Aulas</div>
    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-    <button onclick="tOpenModal('tModalPlano')" class="tbtn-primary">+ Novo Plano</button>
+    <button onclick="tOpenPlanModal()" class="tbtn-primary">+ Novo Plano</button>
     <select id="tPlanoTipo" class="tsearch" style="width:160px">
      <option value="semanal">Semanal</option>
      <option value="mensal">Mensal</option>
@@ -3395,6 +3396,12 @@ async function doAuth(ctx) {
     await svu(u);
     _loadELConfig(); // carrega config ElevenLabs do perfil do professor
     clearAlrts();
+    // Sync automático a cada 15 segundos
+    if(window._syncInterval) clearInterval(window._syncInterval);
+    window._syncInterval = setInterval(async function(){
+      if(!CU||!SB.ok) return;
+      try { await getAllU(); } catch(e) {}
+    }, 15000);
     if (u.role === 'professor') { await loadTeacher(); }
     else {
       voiceGen = u.sexo==='menina'?'f':'m';
@@ -3589,6 +3596,7 @@ async function finCadP() {
 
 // ── LOGOUT ──
 async function doLogout() {
+  if(window._syncInterval){clearInterval(window._syncInterval);window._syncInterval=null;}
   CU=null; activeModes={turma:false,pcd:false};
   b=document.getElementById('profViewBar'); if(b) b.remove();
   mn=document.getElementById('main'); if(mn) mn.style.paddingBottom='52px';
@@ -4036,7 +4044,35 @@ function checkLig() {
 }
 window.checkLig = checkLig;
 
-function loadLigSet(idx,el){document.querySelectorAll('#ligSetBtns .vo').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');selMatch=null;var s=ligSets[idx];var rp=[...s.pairs].sort(()=>Math.random()-.5);var g=document.getElementById('matchGame');if(!g)return;g.innerHTML=`<div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:5px;text-align:center">CONCEITO</div>${s.pairs.map(p=>`<div class="mit" onclick="selM(this,'${p.m}')" data-id="${p.m}">${p.q}</div>`).join('')}</div><div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:5px;text-align:center">DEFINIÇÃO</div>${rp.map(p=>`<div class="mit" onclick="ansM(this,'${p.m}')" data-match="${p.m}">${p.a}</div>`).join('')}</div>`;document.getElementById('matchRes').style.display='none';}
+function loadLigSet(idx,el){
+  document.querySelectorAll('#ligSetBtns .vo').forEach(function(b){b.classList.remove('active');});
+  if(el) el.classList.add('active');
+  selMatch=null;
+  var s=ligSets[idx];
+  var rp=[...s.pairs].sort(function(){return Math.random()-.5;});
+  var g=document.getElementById('matchGame');
+  if(!g) return;
+  if(!document.getElementById('_ligAnimStyle')){
+    var st=document.createElement('style');st.id='_ligAnimStyle';
+    st.textContent='@keyframes ligPulse{0%,100%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.22) rotate(4deg);}}.lig-img{animation:ligPulse 2s ease-in-out infinite;display:inline-block;font-size:1.9rem;line-height:1;min-width:38px;text-align:center;}';
+    document.head.appendChild(st);
+  }
+  g.innerHTML='<div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:7px;text-align:center">CONCEITO</div>'+
+    s.pairs.map(function(p){
+      var emoji=p.q.split(' ')[0];
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+        '<span class="lig-img">'+emoji+'</span>'+
+        '<div class="mit" onclick="selM(this,\''+p.m+'\')" data-id="'+p.m+'" style="flex:1">'+p.q+'</div>'+
+        '</div>';
+    }).join('')+
+  '</div><div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:7px;text-align:center">DEFINIÇÃO</div>'+
+    rp.map(function(p){
+      return '<div class="mit" onclick="ansM(this,\''+p.m+'\')" data-match="'+p.m+'">'+p.a+'</div>';
+    }).join('')+
+  '</div>';
+  var mr=document.getElementById('matchRes');if(mr)mr.style.display='none';
+  spk('Ligue cada conceito à sua definição correta! '+s.lbl);
+}
 function selM(el,id){if(el.classList.contains('mat'))return;document.querySelectorAll('.mit[data-id]').forEach(i=>i.classList.remove('sel'));el.classList.add('sel');selMatch=id;}
 async function ansM(el, idx) {
   if(!ligSel) { ligSel=el; el.classList.add('sel'); return; }
@@ -6131,10 +6167,11 @@ function tShowModule(id) {
   if (id === 'tFrequencia')  tLoadFreqTurmas();
   if (id === 'tPEI')         tLoadPEI();
   if (id === 'tMateriais')   tRenderMateriais();
-  if (id === 'tAtividades')  tRenderAtividades();
-  if (id === 'tComunicacao') tLoadComunicacao();
-  if (id === 'tConfig')      tLoadConfig();
-  if (id === 'tRelatorios')  {} // loaded on demand
+  if (id === 'tAtividades')   tRenderAtividades();
+  if (id === 'tComunicacao')  tLoadComunicacao();
+  if (id === 'tConfig')       tLoadConfig();
+  if (id === 'tPlanejamento') tLoadPlanos();
+  if (id === 'tRelatorios')   {} // loaded on demand
 }
 
 // ── Modals ──
@@ -6822,7 +6859,11 @@ function tShowAvisoDetalhe(id) {
       <span style="background:var(--bg);padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:700;color:var(--mu)">🏫 ${a.turma||'Todas'}</span>
     </div>
     <div style="font-size:.88rem;line-height:1.75;color:var(--tx);background:var(--bg);border-radius:12px;padding:16px;white-space:pre-wrap">${a.conteudo||''}</div>
-    <div style="margin-top:12px;font-size:.7rem;color:var(--mu)">Publicado em: ${a.createdAt||''}</div>`;
+    <div style="margin-top:12px;font-size:.7rem;color:var(--mu)">Publicado em: ${a.createdAt||''}</div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+      <button onclick="enviarWhatsApp('aviso',{titulo:'${(a.titulo||'').replace(/'/g,"\\'")}',conteudo:'${(a.conteudo||'').replace(/'/g,"\\'").replace(/\n/g,' ')}'} )" style="display:flex;align-items:center;gap:6px;background:#25d366;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-family:Nunito,sans-serif;font-weight:800;font-size:.82rem;cursor:pointer">📱 WhatsApp</button>
+      <button onclick="compartilharRede({titulo:'${(a.titulo||'').replace(/'/g,"\\'")}',conteudo:'${(a.conteudo||'').replace(/'/g,"\\'").replace(/\n/g,' ')}'})" style="display:flex;align-items:center;gap:6px;background:#1a56db;color:#fff;border:none;border-radius:10px;padding:9px 16px;font-family:Nunito,sans-serif;font-weight:800;font-size:.82rem;cursor:pointer">📤 Compartilhar</button>
+    </div>`;
   tOpenModal('tModalAvisoDetalhe');
 }
 
@@ -7290,6 +7331,12 @@ async function doAuth(ctx) {
     await svu(u);
     _loadELConfig(); // carrega config ElevenLabs do perfil do professor
     clearAlrts();
+    // Sync automático a cada 15 segundos
+    if(window._syncInterval) clearInterval(window._syncInterval);
+    window._syncInterval = setInterval(async function(){
+      if(!CU||!SB.ok) return;
+      try { await getAllU(); } catch(e) {}
+    }, 15000);
     if (u.role === 'professor') { await loadTeacher(); }
     else {
       voiceGen = u.sexo==='menina'?'f':'m';
@@ -7484,6 +7531,7 @@ async function finCadP() {
 
 // ── LOGOUT ──
 async function doLogout() {
+  if(window._syncInterval){clearInterval(window._syncInterval);window._syncInterval=null;}
   CU=null; activeModes={turma:false,pcd:false};
   b=document.getElementById('profViewBar'); if(b) b.remove();
   mn=document.getElementById('main'); if(mn) mn.style.paddingBottom='52px';
@@ -7771,7 +7819,35 @@ function tutStep(d){if(tutIdx===tutSteps.length-1&&d===1){backPCD();return;}tutI
 ligSets=[{lbl:'Partes do Átomo',pairs:[{q:'⚛️ Átomo',a:'Menor unidade de elemento químico',m:'atom'},{q:'🔴 Próton',a:'Carga positiva, no núcleo',m:'proton'},{q:'🔵 Elétron',a:'Carga negativa, orbita o núcleo',m:'eletron'},{q:'⚪ Nêutron',a:'Sem carga, no núcleo',m:'neutron'}]},{lbl:'Estados da Matéria',pairs:[{q:'🧊 Sólido',a:'Forma e volume definidos',m:'sol'},{q:'💧 Líquido',a:'Volume fixo, forma variável',m:'liq'},{q:'💨 Gasoso',a:'Forma e volume variáveis',m:'gas'},{q:'🌡️ Fusão',a:'Sólido se torna líquido',m:'fus'}]},{lbl:'Cientistas',pairs:[{q:'⚫ Dalton',a:'Átomo maciço e indivisível',m:'dal'},{q:'🔬 Thomson',a:'Modelo pudim de passas',m:'tho'},{q:'☢️ Rutherford',a:'Descobriu o núcleo atômico',m:'rut'},{q:'🌀 Bohr',a:'Elétrons em órbitas definidas',m:'boh'}]}];
 selMatch=null;
 function initLig(){var btns=document.getElementById('ligSetBtns');if(!btns)return;btns.innerHTML=ligSets.map((s,i)=>`<button class="vo ${i===0?'active':''}" onclick="loadLigSet(${i},this)">${s.lbl}</button>`).join('');loadLigSet(0,btns.firstChild);}
-function loadLigSet(idx,el){document.querySelectorAll('#ligSetBtns .vo').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');selMatch=null;var s=ligSets[idx];var rp=[...s.pairs].sort(()=>Math.random()-.5);var g=document.getElementById('matchGame');if(!g)return;g.innerHTML=`<div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:5px;text-align:center">CONCEITO</div>${s.pairs.map(p=>`<div class="mit" onclick="selM(this,'${p.m}')" data-id="${p.m}">${p.q}</div>`).join('')}</div><div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:5px;text-align:center">DEFINIÇÃO</div>${rp.map(p=>`<div class="mit" onclick="ansM(this,'${p.m}')" data-match="${p.m}">${p.a}</div>`).join('')}</div>`;document.getElementById('matchRes').style.display='none';}
+function loadLigSet(idx,el){
+  document.querySelectorAll('#ligSetBtns .vo').forEach(function(b){b.classList.remove('active');});
+  if(el) el.classList.add('active');
+  selMatch=null;
+  var s=ligSets[idx];
+  var rp=[...s.pairs].sort(function(){return Math.random()-.5;});
+  var g=document.getElementById('matchGame');
+  if(!g) return;
+  if(!document.getElementById('_ligAnimStyle')){
+    var st=document.createElement('style');st.id='_ligAnimStyle';
+    st.textContent='@keyframes ligPulse{0%,100%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.22) rotate(4deg);}}.lig-img{animation:ligPulse 2s ease-in-out infinite;display:inline-block;font-size:1.9rem;line-height:1;min-width:38px;text-align:center;}';
+    document.head.appendChild(st);
+  }
+  g.innerHTML='<div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:7px;text-align:center">CONCEITO</div>'+
+    s.pairs.map(function(p){
+      var emoji=p.q.split(' ')[0];
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+
+        '<span class="lig-img">'+emoji+'</span>'+
+        '<div class="mit" onclick="selM(this,\''+p.m+'\')" data-id="'+p.m+'" style="flex:1">'+p.q+'</div>'+
+        '</div>';
+    }).join('')+
+  '</div><div class="mcol"><div style="font-size:.68rem;font-weight:800;color:var(--mu);margin-bottom:7px;text-align:center">DEFINIÇÃO</div>'+
+    rp.map(function(p){
+      return '<div class="mit" onclick="ansM(this,\''+p.m+'\')" data-match="'+p.m+'">'+p.a+'</div>';
+    }).join('')+
+  '</div>';
+  var mr=document.getElementById('matchRes');if(mr)mr.style.display='none';
+  spk('Ligue cada conceito à sua definição correta! '+s.lbl);
+}
 function selM(el,id){if(el.classList.contains('mat'))return;document.querySelectorAll('.mit[data-id]').forEach(i=>i.classList.remove('sel'));el.classList.add('sel');selMatch=id;}
 async function ansM(el,matchId){if(!selMatch||el.classList.contains('mat'))return;var src=document.querySelector(`.mit[data-id="${selMatch}"]`);if(selMatch===matchId){el.classList.add('mat');el.classList.remove('sel');if(src){src.classList.add('mat');src.classList.remove('sel');}var mat=document.querySelectorAll('.mit.mat').length;if(mat>=8){var r=document.getElementById('matchRes');r.style.display='block';r.style.background='var(--gl)';r.style.color='#065f46';r.textContent='🌟 Parabéns! Você ligou todos corretamente!';spk('Parabéns! Você ligou todos os conceitos corretamente!');if(CU){CU=await updProg(CU.username,'estrutura',true)||CU;updateStats();}}}else{el.classList.add('bad');if(src)src.classList.add('bad');setTimeout(()=>{el.classList.remove('bad');if(src)src.classList.remove('bad','sel');},800);spk('Tente novamente!');}selMatch=null;}
 dragged=null;
@@ -7797,24 +7873,119 @@ window.dpcd = dpcd;
 async function checkArr(){var zones=['dalton','rutherford','bohr'];var ok=true;zones.forEach(z=>{var zone=document.getElementById('pz-'+z);var items=zone?.querySelectorAll('[data-type]');if(!items?.length){ok=false;return;}items.forEach(i=>{if(i.dataset.type!==z)ok=false;});});var r=document.getElementById('arrRes');r.style.display='block';if(ok){r.style.background='var(--gl)';r.style.color='#065f46';r.textContent='🌟 Incrível! Você acertou tudo!';spk('Incrível! Você acertou tudo!');if(CU){CU=await updProg(CU.username,'modelos',true)||CU;updateStats();}}else{r.style.background='var(--rl)';r.style.color='#991b1b';r.textContent='❌ Tente novamente!';spk('Tente de novo!');}}
 selCol='#ef4444';
 function selColor(c,el){selCol=c;document.querySelectorAll('.cs').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
-function psvg(el){if(el.tagName==='circle')el.setAttribute('fill',selCol);else if(el.tagName==='ellipse')el.setAttribute('stroke',selCol);}
-function resetPin(){document.querySelectorAll('.pvg').forEach(el=>{if(el.tagName==='circle')el.setAttribute('fill','#bfdbfe');else if(el.tagName==='ellipse')el.setAttribute('stroke','#cbd5e1');});document.getElementById('nucleo-svg')?.setAttribute('fill','#fde68a');}
+function psvg(el){
+  if(!selCol){spk('Selecione uma cor primeiro!');return;}
+  if(el.tagName==='circle') el.setAttribute('fill',selCol);
+  else if(el.tagName==='ellipse') el.setAttribute('stroke',selCol);
+  // Detecta a parte e dá feedback de voz
+  var msg;
+  if(el.id==='nucleo-svg'){
+    if(selCol==='#f59e0b') msg='Correto! Núcleo pintado de amarelo. É onde ficam prótons e nêutrons.';
+    else if(selCol==='#ef4444') msg='Você pintou o núcleo de vermelho. O núcleo contém prótons com carga positiva e nêutrons sem carga.';
+    else msg='Você pintou o núcleo! O centro do átomo onde ficam prótons e nêutrons.';
+  } else if(el.tagName==='ellipse'){
+    if(selCol==='#10b981') msg='Correto! Órbita pintada de verde. É o caminho circular dos elétrons ao redor do núcleo.';
+    else msg='Você pintou uma órbita eletrônica! As órbitas são os caminhos dos elétrons ao redor do núcleo.';
+  } else if(el.tagName==='circle'){
+    if(selCol==='#3b82f6') msg='Correto! Elétron azul. Os elétrons têm carga negativa e giram ao redor do núcleo.';
+    else if(selCol==='#ef4444') msg='Atenção! Elétrons têm carga negativa. Eles são representados em azul. Prótons é que são vermelhos e ficam no núcleo.';
+    else msg='Você pintou um elétron! Partícula de carga negativa que orbita o núcleo.';
+  } else {
+    msg='Você pintou uma parte do átomo!';
+  }
+  spk(msg);
+  el.style.transition='all .3s';
+  el.style.filter='brightness(1.5)';
+  setTimeout(function(){el.style.filter='';},400);
+}
+function resetPin(){document.querySelectorAll('.pvg').forEach(el=>{if(el.tagName==='circle')el.setAttribute('fill','#bfdbfe');else if(el.tagName==='ellipse')el.setAttribute('stroke','#cbd5e1');});document.getElementById('nucleo-svg')?.setAttribute('fill','#fde68a');spk('Pintura reiniciada! Escolha uma cor e pinte as partes do átomo.');}
+var CW_COLORS=['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#06b6d4'];
+var CW_CLUES=[
+  '➡️ 1. Tudo que tem massa e ocupa espaço — 7 letras',
+  '⬇️ 2. Partícula de carga positiva no núcleo — 6 letras',
+  '➡️ 3. Partícula sem carga no núcleo — 7 letras',
+  '⬇️ 4. Propôs o modelo pudim de passas — 7 letras'
+];
 function initCW(){
-  g=document.getElementById('cwGrid');if(!g)return;g.innerHTML='';var sz=9;g.style.gridTemplateColumns=`repeat(${sz},36px)`;
-  words=[{w:'MATERIA',r:0,c:1,d:'h'},{w:'PROTON',r:0,c:2,d:'v'},{w:'NEUTRON',r:4,c:2,d:'h'},{w:'THOMSON',r:0,c:7,d:'v'}];
-  var cells={};words.forEach(({w,r,c,d})=>{for(var i=0;i<w.length;i++){var rr=d==='h'?r:r+i;var cc=d==='h'?c+i:c;if(!cells[rr])cells[rr]={};cells[rr][cc]={letter:w[i]};}});
+  g=document.getElementById('cwGrid');if(!g)return;g.innerHTML='';var sz=9;g.style.gridTemplateColumns='repeat('+sz+',36px)';
+  // Limpa resultado anterior
+  var prevRes=document.getElementById('cwRes');if(prevRes){prevRes.style.display='none';prevRes.textContent='';}
+  // Remove classes de resultado anterior das células
+  document.querySelectorAll('.cw-cell').forEach(function(c){c.classList.remove('ok','err');c.style.background='';c.style.borderColor='';c.style.color='';c.style.outline='';});
+  var words=[{w:'MATERIA',r:0,c:1,d:'h'},{w:'PROTON',r:0,c:2,d:'v'},{w:'NEUTRON',r:4,c:2,d:'h'},{w:'THOMSON',r:0,c:7,d:'v'}];
+  var cells={};words.forEach(function(wd){for(var i=0;i<wd.w.length;i++){var rr=wd.d==='h'?wd.r:wd.r+i;var cc=wd.d==='h'?wd.c+i:wd.c;if(!cells[rr])cells[rr]={};cells[rr][cc]={letter:wd.w[i]};}});
   var ans={};
-  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){var div=document.createElement('div');div.className='cw-cell';div.dataset.r=r;div.dataset.c=c;if(cells[r]&&cells[r][c]){div.classList.add('ac');div.dataset.letter=cells[r][c].letter;ans[`${r}-${c}`]=cells[r][c].letter;div.onclick=()=>selCW(div);}else{div.classList.add('blk');}g.appendChild(div);}
+  for(var r=0;r<sz;r++)for(var c=0;c<sz;c++){var dv=document.createElement('div');dv.className='cw-cell';dv.dataset.r=r;dv.dataset.c=c;if(cells[r]&&cells[r][c]){dv.classList.add('ac');dv.dataset.letter=cells[r][c].letter;ans[r+'-'+c]=cells[r][c].letter;(function(el){el.onclick=function(){selCW(el);};})(dv);}else{dv.classList.add('blk');}g.appendChild(dv);}
   window._cwa=ans;
+  // Teclado colorido A-Z
   kb=document.getElementById('cwKbd');if(!kb)return;kb.innerHTML='';
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l=>{var b=document.createElement('button');b.textContent=l;b.style.cssText='background:var(--v);color:#fff;border:none;border-radius:6px;width:32px;height:32px;font-weight:800;cursor:pointer;font-family:Sora,sans-serif;font-size:.92rem;transition:transform .1s';b.onmousedown=()=>b.style.transform='scale(.88)';b.onmouseup=()=>{b.style.transform='scale(1)';typeCW(l);};kb.appendChild(b);});
-  var clr=document.createElement('button');clr.textContent='⌫';clr.style.cssText='background:#ef4444;color:#fff;border:none;border-radius:6px;width:40px;height:32px;font-weight:800;cursor:pointer;font-size:.9rem';clr.onclick=()=>typeCW('');kb.appendChild(clr);
-  var chk=document.createElement('button');chk.textContent='✓ Verificar';chk.style.cssText='background:var(--g);color:#fff;border:none;border-radius:6px;padding:0 12px;height:32px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif';chk.onclick=checkCW;kb.appendChild(chk);
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l,i){
+    var b=document.createElement('button');b.textContent=l;b.id='cwb-'+l;
+    b.style.cssText='background:'+CW_COLORS[i%CW_COLORS.length]+';color:#fff;border:none;border-radius:8px;width:34px;height:34px;font-weight:800;cursor:pointer;font-family:Sora,sans-serif;font-size:.9rem;transition:all .15s;box-shadow:0 2px 5px rgba(0,0,0,.18)';
+    b.onmousedown=function(){b.style.transform='scale(.85)';};
+    b.onmouseup=function(){b.style.transform='scale(1)';typeCW(l);};
+    kb.appendChild(b);
+  });
+  var clr=document.createElement('button');clr.textContent='⌫';clr.style.cssText='background:#ef4444;color:#fff;border:none;border-radius:8px;width:44px;height:34px;font-weight:800;cursor:pointer;font-size:.9rem';
+  clr.onclick=function(){if(!selCWC)return;selCWC.textContent='';selCWC.classList.remove('ok','err');selCWC.style.background='';selCWC.style.borderColor='';selCWC.style.color='';};
+  kb.appendChild(clr);
+  var chk=document.createElement('button');chk.textContent='✓ Verificar';chk.style.cssText='background:var(--g);color:#fff;border:none;border-radius:8px;padding:0 14px;height:34px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif';chk.onclick=checkCW;kb.appendChild(chk);
+  var rst=document.createElement('button');rst.textContent='🔄 Reiniciar';rst.style.cssText='background:var(--p);color:#fff;border:none;border-radius:8px;padding:0 14px;height:34px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif';rst.onclick=initCW;kb.appendChild(rst);
+  selCWC=null;
+  // Lê as dicas em voz
+  setTimeout(function(){spk('Cruzadinha de Ciências! Ouça as dicas. ' + CW_CLUES.join('. '));},600);
 }
 selCWC=null;
-function selCW(el){document.querySelectorAll('.cw-cell.ac').forEach(c=>c.style.outline='');selCWC=el;el.style.outline='3px solid var(--v)';}
-function typeCW(l){if(!selCWC)return;selCWC.textContent=l;if(!l)return;var cs=Array.from(document.querySelectorAll('.cw-cell.ac'));var idx=cs.indexOf(selCWC);if(idx<cs.length-1)selCW(cs[idx+1]);}
-async function checkCW(){var ans=window._cwa;var all=true;document.querySelectorAll('.cw-cell.ac').forEach(c=>{var k=`${c.dataset.r}-${c.dataset.c}`;if(c.textContent.trim().toUpperCase()===ans[k])c.classList.add('ok');else all=false;});var r=document.getElementById('cwRes');r.style.display='block';if(all){r.style.background='var(--gl)';r.style.color='#065f46';r.textContent='🌟 Cruzadinha completa!';spk('Parabéns! Você completou a cruzadinha!');if(CU){CU=await updProg(CU.username,'tabela',true)||CU;updateStats();}}else{r.style.background='var(--vl)';r.style.color='var(--v)';r.textContent='💜 Quase lá! Continue tentando!';spk('Quase lá! Continue tentando.');}}
+function selCW(el){
+  document.querySelectorAll('.cw-cell.ac').forEach(function(c){c.style.outline='';});
+  selCWC=el;
+  el.style.outline='3px solid var(--v)';
+  // Voz: fala a letra atual se já preenchida
+  if(el.textContent.trim()) spk(el.textContent.trim());
+}
+function typeCW(l){
+  if(!selCWC)return;
+  selCWC.textContent=l;
+  selCWC.classList.remove('ok','err');
+  selCWC.style.background='';selCWC.style.borderColor='';selCWC.style.color='';
+  spk(l);
+  // Avança para próxima célula
+  var cs=Array.from(document.querySelectorAll('.cw-cell.ac'));
+  var idx=cs.indexOf(selCWC);
+  if(idx<cs.length-1) selCW(cs[idx+1]);
+}
+async function checkCW(){
+  var ans=window._cwa;if(!ans)return;
+  var total=0,acertos=0;
+  document.querySelectorAll('.cw-cell.ac').forEach(function(c){
+    var k=c.dataset.r+'-'+c.dataset.c;
+    var typed=(c.textContent||'').trim().toUpperCase();
+    var correct=ans[k];
+    total++;
+    if(typed===correct){
+      acertos++;
+      c.classList.add('ok');c.classList.remove('err');
+      c.style.background='var(--g)';c.style.borderColor='var(--g)';c.style.color='#fff';
+    } else {
+      c.classList.add('err');c.classList.remove('ok');
+      c.style.background='var(--r)';c.style.borderColor='var(--r)';c.style.color='#fff';
+    }
+  });
+  var res=document.getElementById('cwRes');
+  if(res){
+    res.style.display='block';
+    if(acertos===total){
+      res.style.background='var(--gl)';res.style.color='#065f46';
+      res.textContent='🌟 Perfeito! Todas as letras corretas!';
+      spk('Parabéns! Você completou a cruzadinha com todas as respostas corretas!');
+      if(CU){CU=await updProg(CU.username,'tabela',true)||CU;updateStats();}
+    } else {
+      res.style.background='var(--rl)';res.style.color='#991b1b';
+      res.textContent='❌ '+acertos+' de '+total+' letras corretas. As vermelhas estão erradas!';
+      spk('Você acertou '+acertos+' de '+total+' letras. As células vermelhas estão erradas. Tente corrigir!');
+    }
+  }
+}
 function handleSrch(v){if(!v.trim())return;var m={'materia':'materia','matéria':'materia','substancia':'substancias','substância':'substancias','mistura':'substancias','modelo':'modelos','dalton':'modelos','bohr':'modelos','estrutura':'estrutura','proton':'estrutura','eletron':'estrutura','radio':'radio','radioatividade':'radio','ligacao':'ligacoes','ligação':'ligacoes'};var lw=v.toLowerCase();for(const[k,val]of Object.entries(m)){if(lw.includes(k)){openTM(val);return;}}}
 
 // ── INIT ──
@@ -7928,9 +8099,16 @@ window.updPavPhoto = updPavPhoto;
 // ── Missing functions ──
 function tRenderFreqRelatorio() { showToast('Relatório em desenvolvimento', 'ok'); }
 function resetArr() {
+  // Limpa as zonas de drop
   ['dalton','rutherford','bohr'].forEach(z=>{
     var zone=document.getElementById('pz-'+z);
     if(zone) zone.innerHTML='Arraste aqui...';
+  });
+  // Restaura todos os itens arrastáveis
+  document.querySelectorAll('.di').forEach(function(el){
+    el.style.opacity='1';
+    el.style.pointerEvents='auto';
+    el._placed=false;
   });
   r=document.getElementById('arrRes'); if(r) r.style.display='none';
   spk('Atividade reiniciada!');
@@ -8060,6 +8238,92 @@ window.tUpdProfPhoto = tUpdProfPhoto; window.tSaveElevenLabs = tSaveElevenLabs;
 window._showCloudConfig = _showCloudConfig; window._doSbSave = _doSbSave; window._sbDisconnect = _sbDisconnect;
 window._cfgTab = _cfgTab;
 
+
+// ══════════════════════════════════════════
+// PLANEJAMENTO COM BNCC
+// ══════════════════════════════════════════
+var _tPlanos = [];
+var BNCC_HABILIDADES = [
+  {cod:'EF09CI01',desc:'Investigar as propriedades físicas e químicas dos materiais'},
+  {cod:'EF09CI02',desc:'Comparar quantidades de reagentes e produtos em transformações químicas'},
+  {cod:'EF09CI03',desc:'Identificar modelos que descrevem a estrutura da matéria'},
+  {cod:'EF09CI04',desc:'Relacionar transformações químicas com fenômenos do cotidiano'},
+  {cod:'EF09CI05',desc:'Investigar a natureza elétrica dos materiais e fenômenos eletrostáticos'},
+  {cod:'EF09CI06',desc:'Relacionar os efeitos de campos elétrico e magnético'},
+  {cod:'EF09CI07',desc:'Planejar experimentos sobre eletricidade e magnetismo'},
+  {cod:'EF09CI08',desc:'Relacionar sistema nervoso com comportamentos automáticos e aprendizagem'},
+  {cod:'EF09CI09',desc:'Discutir a evolução das espécies e seleção natural'},
+  {cod:'EF09CI10',desc:'Analisar a composição dos alimentos e as funções dos nutrientes'},
+];
+
+function tOpenPlanModal() {
+  // Cria modal dinamicamente se não existir
+  if(!document.getElementById('tModalPlano')) {
+    var m=document.createElement('div');
+    m.className='tmodal';m.id='tModalPlano';
+    m.innerHTML='<div class="tmodal-box" style="max-width:620px"><div class="tmodal-hdr">🗓️ Novo Plano de Aula <button class="tmodal-close" onclick="tCloseModal(\'tModalPlano\')">✕</button></div><div class="tmodal-body"><div class="fg"><label class="fl">Título do Plano <span class="fr">*</span></label><input class="fi" id="mPlanoTitulo" placeholder="Ex: Estrutura do Átomo — Semana 1"></div><div class="frow2"><div class="fg"><label class="fl">Tipo</label><select class="fs" id="mPlanoTipo"><option value="semanal">📅 Semanal</option><option value="mensal">📆 Mensal</option></select></div><div class="fg"><label class="fl">Data</label><input class="fi" id="mPlanoData" type="date"></div></div><div class="fg"><label class="fl">Objetivos de Aprendizagem</label><textarea class="fi" id="mPlanoObjetivos" style="min-height:70px;resize:vertical" placeholder="O que os alunos vão aprender?"></textarea></div><div class="fg"><label class="fl">Habilidade BNCC</label><select class="fs" id="mPlanoBNCC"><option value="">Selecione a habilidade BNCC</option>'+BNCC_HABILIDADES.map(function(h){return'<option value="'+h.cod+'">'+h.cod+' — '+h.desc+'</option>';}).join('')+'</select></div><div class="fg"><label class="fl">Conteúdo / Estratégias</label><textarea class="fi" id="mPlanoConteudo" style="min-height:80px;resize:vertical" placeholder="Descreva as estratégias pedagógicas, recursos e atividades..."></textarea></div><div class="fg"><label class="fl">Materiais Necessários</label><input class="fi" id="mPlanoMateriais" placeholder="Livro, datashow, fichas, laboratório..."></div><div class="fg"><label class="fl">Turma</label><select class="fs" id="mPlanoTurma"><option value="Todas">Todas as turmas</option><option value="9A">9º A</option><option value="9B">9º B</option><option value="9C">9º C</option><option value="9D">9º D</option></select></div><button onclick="tSavePlano()" class="tbtn-primary" style="width:100%;margin-top:4px">💾 Salvar Plano</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('active');});
+  }
+  // Preenche data padrão com hoje
+  var di=document.getElementById('mPlanoData');if(di&&!di.value)di.value=new Date().toISOString().split('T')[0];
+  tOpenModal('tModalPlano');
+}
+window.tOpenPlanModal = tOpenPlanModal;
+
+async function tSavePlano() {
+  var titulo=(document.getElementById('mPlanoTitulo')?.value||'').trim();
+  if(!titulo){showToast('Informe o título do plano','err');return;}
+  var plano={
+    id:'pl_'+Date.now(),
+    titulo:titulo,
+    tipo:document.getElementById('mPlanoTipo')?.value||'semanal',
+    data:document.getElementById('mPlanoData')?.value||'',
+    objetivos:document.getElementById('mPlanoObjetivos')?.value||'',
+    bncc:document.getElementById('mPlanoBNCC')?.value||'',
+    bnccDesc:BNCC_HABILIDADES.find(function(h){return h.cod===document.getElementById('mPlanoBNCC')?.value;})?.desc||'',
+    conteudo:document.getElementById('mPlanoConteudo')?.value||'',
+    materiais:document.getElementById('mPlanoMateriais')?.value||'',
+    turma:document.getElementById('mPlanoTurma')?.value||'Todas',
+    professor:CU?.nome||'',
+    createdAt:new Date().toLocaleString('pt-BR'),
+  };
+  _tPlanos.unshift(plano);
+  if(CU){CU._planos=_tPlanos;await svu(CU);}
+  tCloseModal('tModalPlano');
+  tRenderPlanos();
+  showToast('✅ Plano salvo com sucesso!','ok');
+  // Limpa campos
+  ['mPlanoTitulo','mPlanoObjetivos','mPlanoBNCC','mPlanoConteudo','mPlanoMateriais'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+}
+window.tSavePlano = tSavePlano;
+
+function tRenderPlanos() {
+  var list=document.getElementById('tPlanoList');if(!list)return;
+  if(!_tPlanos.length){list.innerHTML='<div style="color:var(--mu);font-size:.85rem;text-align:center;padding:24px">Nenhum plano cadastrado. Clique em "+ Novo Plano" para começar.</div>';return;}
+  var tipo=document.getElementById('tPlanoTipo')?.value||'';
+  var filtered=tipo?_tPlanos.filter(function(p){return p.tipo===tipo;}):_tPlanos;
+  list.innerHTML=filtered.map(function(p){
+    var bnccBadge=p.bncc?'<span style="background:var(--vl);color:var(--v);padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:800">📚 '+p.bncc+'</span>':'';
+    var tipoBadge=p.tipo==='mensal'?'📆 Mensal':'📅 Semanal';
+    return '<div class="tcard" style="padding:16px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px"><div style="font-weight:800;font-size:.93rem;color:var(--tx)">'+p.titulo+'</div><span style="font-size:.73rem;color:var(--mu);white-space:nowrap">'+p.data+'</span></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><span style="background:var(--pl);color:var(--p);padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700">'+tipoBadge+'</span>'+bnccBadge+'<span style="background:var(--bg);color:var(--mu);padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700">🏫 '+p.turma+'</span></div>'+(p.bnccDesc?'<div style="font-size:.78rem;color:var(--v);margin-bottom:8px;font-style:italic">📌 BNCC: '+p.bnccDesc+'</div>':'')+(p.objetivos?'<div style="font-size:.8rem;color:var(--tx);margin-bottom:6px"><strong>Objetivos:</strong> '+p.objetivos+'</div>':'')+(p.conteudo?'<div style="font-size:.78rem;color:var(--mu)">'+p.conteudo.slice(0,120)+(p.conteudo.length>120?'…':'')+'</div>':'')+'<div style="margin-top:10px;display:flex;gap:6px"><button onclick="tExcluirPlano(\''+p.id+'\')" style="background:var(--rl);color:var(--r);border:none;border-radius:7px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer">🗑 Excluir</button></div></div>';
+  }).join('');
+}
+window.tRenderPlanos = tRenderPlanos;
+
+function tExcluirPlano(id){
+  _tPlanos=_tPlanos.filter(function(p){return p.id!==id;});
+  if(CU){CU._planos=_tPlanos;svu(CU);}
+  tRenderPlanos();
+  showToast('Plano removido','ok');
+}
+window.tExcluirPlano = tExcluirPlano;
+
+function tLoadPlanos(){
+  if(CU&&CU._planos) _tPlanos=CU._planos;
+  tRenderPlanos();
+}
+window.tLoadPlanos = tLoadPlanos;
 
 // ── CALENDÁRIO MENSAL ──
 _calDate = new Date();
