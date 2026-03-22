@@ -1620,6 +1620,8 @@ tr:hover td{background:#f8faff}
 <script>
 
 
+
+
 // ═══ ALL GLOBAL VARIABLES — declared here to avoid temporal dead zone ═══
 var _syncTimer = null;
 var _syncInterval = null;
@@ -4061,10 +4063,25 @@ async function ansM(el, idx) {
 }
 window.ansM = ansM;
 var dragged=null;
-function ds(e){dragged=e.target;}
+function ds(e){dragged=e.target.closest('.di')||e.target;}
 function dov(e){e.preventDefault();e.currentTarget.classList.add('over');}
 function dlv(e){e.currentTarget.classList.remove('over');}
-function dpcd(e,zone){e.preventDefault();e.currentTarget.classList.remove('over');if(!dragged)return;var cl=dragged.cloneNode(true);cl.draggable=false;e.currentTarget.appendChild(cl);dragged.remove();}
+function dpcd(e,zone){
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  if(!dragged) return;
+  // Clone into zone
+  var cl = dragged.cloneNode(true);
+  cl.draggable = false;
+  cl.style.cursor = 'default';
+  e.currentTarget.innerHTML = '';
+  e.currentTarget.appendChild(cl);
+  // Hide original (not remove) so resetArr can show it again
+  dragged.style.opacity = '0.3';
+  dragged.style.pointerEvents = 'none';
+  dragged._placed = true;
+}
+window.dpcd = dpcd;
 async function checkArr() {
   var zones  = ['dalton','rutherford','bohr'];
   correct = { dalton:'esfera', rutherford:'nucleo', bohr:'orbitas' };
@@ -4354,41 +4371,23 @@ window.updPavPhoto = updPavPhoto;
 // ── Missing functions ──
 function tRenderFreqRelatorio() { showToast('Relatório em desenvolvimento', 'ok'); }
 function resetArr() {
-  // Reset zones
-  ['dalton','rutherford','bohr'].forEach(z=>{
-    var zone=document.getElementById('pz-'+z);
-    if(zone) {
-      zone.innerHTML='<span style="opacity:.4;font-size:.78rem">Arraste aqui...</span>';
-      zone.style.border='2px dashed var(--bd)';
-      zone.style.background='var(--sur)';
-      zone.style.boxShadow='none';
+  if(typeof initArr === 'function') {
+    initArr();
+  } else {
+    // Fallback rebuild
+    var src = document.querySelector('#pa-arr .di-src');
+    if(src) {
+      src.innerHTML = '<div class="di" draggable="true" data-type="dalton" ondragstart="ds(event)" style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--vl);border-radius:9px;border:2px solid var(--v);cursor:grab"><span style=\'font-weight:700;font-size:.88rem\'>🔵 Dalton</span></div><div class="di" draggable="true" data-type="rutherford" ondragstart="ds(event)" style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--rl);border-radius:9px;border:2px solid var(--r);cursor:grab"><span style=\'font-weight:700;font-size:.88rem\'>🔴 Rutherford</span></div><div class="di" draggable="true" data-type="bohr" ondragstart="ds(event)" style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--gl);border-radius:9px;border:2px solid var(--g);cursor:grab"><span style=\'font-weight:700;font-size:.88rem\'>🟡 Bohr</span></div>';
     }
-  });
-  // Restore scientists using initArr logic
-  var c = document.getElementById('pa-arr');
-  var src = c ? c.querySelector('.di-src') : null;
-  if(src) {
-    src.innerHTML = `
-      <div class="di" draggable="true" data-type="dalton" ondragstart="ds(event)"
-        style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--vl);border-radius:9px;border:2px solid var(--v);cursor:grab">
-        <svg viewBox="0 0 40 40" width="32" height="32"><circle cx="20" cy="20" r="18" fill="#3b82f6" opacity=".2" stroke="#3b82f6" stroke-width="2"/><circle cx="20" cy="20" r="8" fill="#3b82f6"/></svg>
-        <span style="font-weight:700;font-size:.88rem">🔵 Dalton</span>
-      </div>
-      <div class="di" draggable="true" data-type="rutherford" ondragstart="ds(event)"
-        style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--rl);border-radius:9px;border:2px solid var(--r);cursor:grab">
-        <svg viewBox="0 0 40 40" width="32" height="32"><circle cx="20" cy="20" r="4" fill="#ef4444"/><ellipse cx="20" cy="20" rx="18" ry="8" fill="none" stroke="#ef4444" stroke-width="1.5"/><circle cx="38" cy="20" r="3" fill="#f97316"/></svg>
-        <span style="font-weight:700;font-size:.88rem">🔴 Rutherford</span>
-      </div>
-      <div class="di" draggable="true" data-type="bohr" ondragstart="ds(event)"
-        style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--gl);border-radius:9px;border:2px solid var(--g);cursor:grab">
-        <svg viewBox="0 0 40 40" width="32" height="32"><circle cx="20" cy="20" r="5" fill="#22c55e"/><circle cx="20" cy="20" r="14" fill="none" stroke="#22c55e" stroke-width="1.5"/><circle cx="34" cy="20" r="3" fill="#3b82f6"/></svg>
-        <span style="font-weight:700;font-size:.88rem">🟡 Bohr</span>
-      </div>
-    `;
+    ['dalton','rutherford','bohr'].forEach(function(z){
+      var zone=document.getElementById('pz-'+z);
+      if(zone) { zone.innerHTML='Arraste aqui...'; zone.style.border=''; zone.style.background=''; zone.style.boxShadow=''; }
+    });
   }
   var r=document.getElementById('arrRes'); if(r) r.style.display='none';
-  spk('Atividade reiniciada! Arraste novamente os cientistas para seus modelos.');
+  spk('Atividade reiniciada!');
 }
+window.resetArr = resetArr;
 window.resetArr = resetArr;
 window.resetArr = resetArr;
 async function saveLink() {
@@ -4769,7 +4768,7 @@ Retorne APENAS um JSON com este formato:
   try {
     var resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'x-api-key': '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' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -7747,10 +7746,25 @@ function loadLigSet(idx,el){document.querySelectorAll('#ligSetBtns .vo').forEach
 function selM(el,id){if(el.classList.contains('mat'))return;document.querySelectorAll('.mit[data-id]').forEach(i=>i.classList.remove('sel'));el.classList.add('sel');selMatch=id;}
 async function ansM(el,matchId){if(!selMatch||el.classList.contains('mat'))return;var src=document.querySelector(`.mit[data-id="${selMatch}"]`);if(selMatch===matchId){el.classList.add('mat');el.classList.remove('sel');if(src){src.classList.add('mat');src.classList.remove('sel');}var mat=document.querySelectorAll('.mit.mat').length;if(mat>=8){var r=document.getElementById('matchRes');r.style.display='block';r.style.background='var(--gl)';r.style.color='#065f46';r.textContent='🌟 Parabéns! Você ligou todos corretamente!';spk('Parabéns! Você ligou todos os conceitos corretamente!');if(CU){CU=await updProg(CU.username,'estrutura',true)||CU;updateStats();}}}else{el.classList.add('bad');if(src)src.classList.add('bad');setTimeout(()=>{el.classList.remove('bad');if(src)src.classList.remove('bad','sel');},800);spk('Tente novamente!');}selMatch=null;}
 dragged=null;
-function ds(e){dragged=e.target;}
+function ds(e){dragged=e.target.closest('.di')||e.target;}
 function dov(e){e.preventDefault();e.currentTarget.classList.add('over');}
 function dlv(e){e.currentTarget.classList.remove('over');}
-function dpcd(e,zone){e.preventDefault();e.currentTarget.classList.remove('over');if(!dragged)return;var cl=dragged.cloneNode(true);cl.draggable=false;e.currentTarget.appendChild(cl);dragged.remove();}
+function dpcd(e,zone){
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  if(!dragged) return;
+  // Clone into zone
+  var cl = dragged.cloneNode(true);
+  cl.draggable = false;
+  cl.style.cursor = 'default';
+  e.currentTarget.innerHTML = '';
+  e.currentTarget.appendChild(cl);
+  // Hide original (not remove) so resetArr can show it again
+  dragged.style.opacity = '0.3';
+  dragged.style.pointerEvents = 'none';
+  dragged._placed = true;
+}
+window.dpcd = dpcd;
 async function checkArr(){var zones=['dalton','rutherford','bohr'];var ok=true;zones.forEach(z=>{var zone=document.getElementById('pz-'+z);var items=zone?.querySelectorAll('[data-type]');if(!items?.length){ok=false;return;}items.forEach(i=>{if(i.dataset.type!==z)ok=false;});});var r=document.getElementById('arrRes');r.style.display='block';if(ok){r.style.background='var(--gl)';r.style.color='#065f46';r.textContent='🌟 Incrível! Você acertou tudo!';spk('Incrível! Você acertou tudo!');if(CU){CU=await updProg(CU.username,'modelos',true)||CU;updateStats();}}else{r.style.background='var(--rl)';r.style.color='#991b1b';r.textContent='❌ Tente novamente!';spk('Tente de novo!');}}
 selCol='#ef4444';
 function selColor(c,el){selCol=c;document.querySelectorAll('.cs').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
@@ -8163,6 +8177,8 @@ window._saveELConfigPermanent = _saveELConfigPermanent;
     window[n]=eval(n);
   });
 })();
+
+
 
 
 
