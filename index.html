@@ -4483,10 +4483,9 @@ async function tElTesteDirecto() {
   if(!API_KEY){if(st){st.textContent='❌ Cole a API Key primeiro!';st.style.color='var(--r)';}return;}
   if(st){st.textContent='⏳ Testando...';st.style.color='var(--p)';}
   try {
-    var r=await fetch('https://api.elevenlabs.io/v1/user',{headers:{'xi-api-key':API_KEY}});
-    if(!r.ok){if(st){st.textContent='❌ API Key inválida ('+r.status+')';st.style.color='var(--r)';}return;}
-    var u=await r.json();
-    if(st){st.textContent='✅ Chave OK! Conta: '+(u.first_name||'')+' — Gerando áudio...';st.style.color='var(--g)';}
+    var r=await fetch('https://api.elevenlabs.io/v1/models',{headers:{'xi-api-key':API_KEY}});
+    if(!r.ok){if(st){st.textContent='❌ API Key inválida ('+r.status+') — verifique a chave no painel do ElevenLabs';st.style.color='var(--r)';}return;}
+    if(st){st.textContent='✅ Chave válida! Gerando áudio...';st.style.color='var(--g)';}
     EL_CONFIG.apiKey=API_KEY; EL_CONFIG.voiceId=VOICE_ID;
     await _saveELConfigPermanent({apiKey:API_KEY,voiceId:VOICE_ID,gender:'f'});
     await elSpeak('Olá! Esta é a voz do ÁTUMUS!');
@@ -7931,10 +7930,9 @@ async function tElTesteDirecto() {
   if(!API_KEY){if(st){st.textContent='❌ Cole a API Key primeiro!';st.style.color='var(--r)';}return;}
   if(st){st.textContent='⏳ Testando...';st.style.color='var(--p)';}
   try {
-    var r=await fetch('https://api.elevenlabs.io/v1/user',{headers:{'xi-api-key':API_KEY}});
-    if(!r.ok){if(st){st.textContent='❌ API Key inválida ('+r.status+')';st.style.color='var(--r)';}return;}
-    var u=await r.json();
-    if(st){st.textContent='✅ Chave OK! Conta: '+(u.first_name||'')+' — Gerando áudio...';st.style.color='var(--g)';}
+    var r=await fetch('https://api.elevenlabs.io/v1/models',{headers:{'xi-api-key':API_KEY}});
+    if(!r.ok){if(st){st.textContent='❌ API Key inválida ('+r.status+') — verifique a chave no painel do ElevenLabs';st.style.color='var(--r)';}return;}
+    if(st){st.textContent='✅ Chave válida! Gerando áudio...';st.style.color='var(--g)';}
     EL_CONFIG.apiKey=API_KEY; EL_CONFIG.voiceId=VOICE_ID;
     await _saveELConfigPermanent({apiKey:API_KEY,voiceId:VOICE_ID,gender:'f'});
     await elSpeak('Olá! Esta é a voz do ÁTUMUS!');
