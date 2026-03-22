@@ -4693,18 +4693,19 @@ window.verifyP = verifyP;
 async function _saveELConfigPermanent(cfg) {
   Object.assign(EL_CONFIG, cfg);
   EL_CONFIG._valid = true;
+  var cfgToSave = Object.assign({}, cfg, { _valid: true });
   // 1. localStorage
-  try { localStorage.setItem('_atumus_el', JSON.stringify(cfg)); } catch(e) {}
+  try { localStorage.setItem('_atumus_el', JSON.stringify(cfgToSave)); } catch(e) {}
   // 2. Elemento HTML
   try {
     var el = document.getElementById('atumus-db');
     var cur = (() => { try { return JSON.parse(el?.textContent||'{}'); } catch(e){return{};} })();
-    cur._el = cfg; if(el) el.textContent = JSON.stringify(cur);
+    cur._el = cfgToSave; if(el) el.textContent = JSON.stringify(cur);
   } catch(e) {}
   // 3. Perfil do professor
-  if(CU) { CU.elConfig = cfg; await svu(CU); }
+  if(CU) { CU.elConfig = cfgToSave; await svu(CU); }
   // 4. Entrada dedicada no Supabase
-  try { await svu({ username:'__el_config__', role:'system', elConfig: cfg }); } catch(e) {}
+  try { await svu({ username:'__el_config__', role:'system', elConfig: cfgToSave }); } catch(e) {}
 }
 window._saveELConfigPermanent = _saveELConfigPermanent;
 
@@ -5564,9 +5565,9 @@ voiceGen = 'f';
 
 // ── _loadELConfig ──
 function _loadELConfig() {
-  if (CU?.elConfig?.apiKey) { Object.assign(EL_CONFIG, CU.elConfig); return; }
-  try { var s=localStorage.getItem('_atumus_el'); if(s){var c=JSON.parse(s);if(c.apiKey){Object.assign(EL_CONFIG,c);return;}} } catch(e){}
-  try { var el=document.getElementById('atumus-db'); var cur=JSON.parse(el?.textContent||'{}'); if(cur._el?.apiKey) Object.assign(EL_CONFIG,cur._el); } catch(e){}
+  if (CU?.elConfig?.apiKey) { Object.assign(EL_CONFIG, CU.elConfig); EL_CONFIG._valid = true; return; }
+  try { var s=localStorage.getItem('_atumus_el'); if(s){var c=JSON.parse(s);if(c.apiKey){Object.assign(EL_CONFIG,c); EL_CONFIG._valid = true; return;}} } catch(e){}
+  try { var el=document.getElementById('atumus-db'); var cur=JSON.parse(el?.textContent||'{}'); if(cur._el?.apiKey){ Object.assign(EL_CONFIG,cur._el); EL_CONFIG._valid = true; } } catch(e){}
 }
 window._loadELConfig = _loadELConfig;
 
@@ -8149,18 +8150,19 @@ window.verifyP = verifyP;
 async function _saveELConfigPermanent(cfg) {
   Object.assign(EL_CONFIG, cfg);
   EL_CONFIG._valid = true;
+  var cfgToSave = Object.assign({}, cfg, { _valid: true });
   // 1. localStorage
-  try { localStorage.setItem('_atumus_el', JSON.stringify(cfg)); } catch(e) {}
+  try { localStorage.setItem('_atumus_el', JSON.stringify(cfgToSave)); } catch(e) {}
   // 2. Elemento HTML
   try {
     var el = document.getElementById('atumus-db');
     var cur = (() => { try { return JSON.parse(el?.textContent||'{}'); } catch(e){return{};} })();
-    cur._el = cfg; if(el) el.textContent = JSON.stringify(cur);
+    cur._el = cfgToSave; if(el) el.textContent = JSON.stringify(cur);
   } catch(e) {}
   // 3. Perfil do professor
-  if(CU) { CU.elConfig = cfg; await svu(CU); }
+  if(CU) { CU.elConfig = cfgToSave; await svu(CU); }
   // 4. Entrada dedicada no Supabase
-  try { await svu({ username:'__el_config__', role:'system', elConfig: cfg }); } catch(e) {}
+  try { await svu({ username:'__el_config__', role:'system', elConfig: cfgToSave }); } catch(e) {}
 }
 window._saveELConfigPermanent = _saveELConfigPermanent;
 
