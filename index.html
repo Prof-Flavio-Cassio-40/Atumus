@@ -1013,7 +1013,7 @@ tr:hover td{background:#f8faff}
         </select>
         <button onclick="_elLoadUserVoices()" title="Carregar minhas vozes do ElevenLabs" style="background:var(--p);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.85rem;white-space:nowrap">🔄 Carregar</button>
        </div>
-       <div id="tElStatus" style="font-size:.74rem;color:var(--mu);margin-top:4px"></div>
+       <div id="tElVoiceStatus" style="font-size:.74rem;color:var(--mu);margin-top:4px"></div>
       </div>
       <div class="fg"><label class="fl">Voice ID personalizado (opcional)</label><input class="fi" id="tElVoice" placeholder="Cole aqui o ID de outra voz"></div>
       <div style="display:flex;gap:8px">
@@ -3081,18 +3081,15 @@ var EL_CONFIG = {
   _valid:  true
 };
 
-function tSaveElevenLabs() {
+async function tSaveElevenLabs() {
   EL_CONFIG.apiKey  = document.getElementById('tElKey')?.value.trim() || '';
-  EL_CONFIG.voiceId = document.getElementById('tElVoice')?.value.trim() || '';
+  EL_CONFIG.voiceId = document.getElementById('tElVoice')?.value.trim() || EL_CONFIG.voiceId || 'z4TyOBrj3VLc58BFj9u4';
   if (!EL_CONFIG.apiKey) { showToast('Informe a API Key do ElevenLabs', 'err'); return; }
-  // Save to HTML element
-  try {
-    var el = document.getElementById('atumus-db');
-    var cur = (() => { try { return JSON.parse(el?.textContent||'{}'); } catch(e){return{};} })();
-    cur._el = { apiKey: EL_CONFIG.apiKey, voiceId: EL_CONFIG.voiceId };
-    if (el) el.textContent = JSON.stringify(cur);
-  } catch(e) {}
-  showToast('✅ ElevenLabs configurado!', 'ok');
+  var st = document.getElementById('tElStatus');
+  if(st) { st.textContent = '⏳ Salvando...'; st.style.color = 'var(--p)'; }
+  await _saveELConfigPermanent({ apiKey: EL_CONFIG.apiKey, voiceId: EL_CONFIG.voiceId, gender: EL_CONFIG.gender || 'f' });
+  if(st) { st.textContent = '✅ Configuração salva!'; st.style.color = 'var(--g)'; }
+  showToast('✅ ElevenLabs configurado e salvo!', 'ok');
 }
 
 async function elSpeak(text) {
@@ -6970,18 +6967,15 @@ EL_CONFIG = {
   _valid:  true
 };
 
-function tSaveElevenLabs() {
+async function tSaveElevenLabs() {
   EL_CONFIG.apiKey  = document.getElementById('tElKey')?.value.trim() || '';
-  EL_CONFIG.voiceId = document.getElementById('tElVoice')?.value.trim() || '';
+  EL_CONFIG.voiceId = document.getElementById('tElVoice')?.value.trim() || EL_CONFIG.voiceId || 'z4TyOBrj3VLc58BFj9u4';
   if (!EL_CONFIG.apiKey) { showToast('Informe a API Key do ElevenLabs', 'err'); return; }
-  // Save to HTML element
-  try {
-    var el = document.getElementById('atumus-db');
-    var cur = (() => { try { return JSON.parse(el?.textContent||'{}'); } catch(e){return{};} })();
-    cur._el = { apiKey: EL_CONFIG.apiKey, voiceId: EL_CONFIG.voiceId };
-    if (el) el.textContent = JSON.stringify(cur);
-  } catch(e) {}
-  showToast('✅ ElevenLabs configurado!', 'ok');
+  var st = document.getElementById('tElStatus');
+  if(st) { st.textContent = '⏳ Salvando...'; st.style.color = 'var(--p)'; }
+  await _saveELConfigPermanent({ apiKey: EL_CONFIG.apiKey, voiceId: EL_CONFIG.voiceId, gender: EL_CONFIG.gender || 'f' });
+  if(st) { st.textContent = '✅ Configuração salva!'; st.style.color = 'var(--g)'; }
+  showToast('✅ ElevenLabs configurado e salvo!', 'ok');
 }
 
 async function elSpeak(text) {
@@ -8185,4 +8179,8 @@ window._saveELConfigPermanent = _saveELConfigPermanent;
 
 </script>
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> 5662d275667149d818f5b48e7928b90434dd6d56
