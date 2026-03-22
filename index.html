@@ -1619,6 +1619,7 @@ tr:hover td{background:#f8faff}
 
 <script>
 
+
 // ═══ ALL GLOBAL VARIABLES — declared here to avoid temporal dead zone ═══
 var _syncTimer = null;
 var _syncInterval = null;
@@ -4353,23 +4354,42 @@ window.updPavPhoto = updPavPhoto;
 // ── Missing functions ──
 function tRenderFreqRelatorio() { showToast('Relatório em desenvolvimento', 'ok'); }
 function resetArr() {
-  // Restore drop zones
+  // Reset zones
   ['dalton','rutherford','bohr'].forEach(z=>{
     var zone=document.getElementById('pz-'+z);
-    if(zone) zone.innerHTML='<span style="opacity:.5;font-size:.8rem">Arraste aqui...</span>';
+    if(zone) {
+      zone.innerHTML='<span style="opacity:.4;font-size:.78rem">Arraste aqui...</span>';
+      zone.style.border='2px dashed var(--bd)';
+      zone.style.background='var(--sur)';
+      zone.style.boxShadow='none';
+    }
   });
-  // Restore draggable items to source
-  var src = document.querySelector('.di-src');
+  // Restore scientists using initArr logic
+  var c = document.getElementById('pa-arr');
+  var src = c ? c.querySelector('.di-src') : null;
   if(src) {
     src.innerHTML = `
-      <div class="di" style="font-size:.9rem;padding:10px 13px;background:var(--v);border-radius:9px" draggable="true" data-type="dalton" ondragstart="ds(event)">🔵 Dalton</div>
-      <div class="di" style="font-size:.9rem;padding:10px 13px;background:var(--v);border-radius:9px" draggable="true" data-type="rutherford" ondragstart="ds(event)">🔴 Rutherford</div>
-      <div class="di" style="font-size:.9rem;padding:10px 13px;background:var(--v);border-radius:9px" draggable="true" data-type="bohr" ondragstart="ds(event)">🟡 Bohr</div>
+      <div class="di" draggable="true" data-type="dalton" ondragstart="ds(event)"
+        style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--vl);border-radius:9px;border:2px solid var(--v);cursor:grab">
+        <svg viewBox="0 0 40 40" width="32" height="32"><circle cx="20" cy="20" r="18" fill="#3b82f6" opacity=".2" stroke="#3b82f6" stroke-width="2"/><circle cx="20" cy="20" r="8" fill="#3b82f6"/></svg>
+        <span style="font-weight:700;font-size:.88rem">🔵 Dalton</span>
+      </div>
+      <div class="di" draggable="true" data-type="rutherford" ondragstart="ds(event)"
+        style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--rl);border-radius:9px;border:2px solid var(--r);cursor:grab">
+        <svg viewBox="0 0 40 40" width="32" height="32"><circle cx="20" cy="20" r="4" fill="#ef4444"/><ellipse cx="20" cy="20" rx="18" ry="8" fill="none" stroke="#ef4444" stroke-width="1.5"/><circle cx="38" cy="20" r="3" fill="#f97316"/></svg>
+        <span style="font-weight:700;font-size:.88rem">🔴 Rutherford</span>
+      </div>
+      <div class="di" draggable="true" data-type="bohr" ondragstart="ds(event)"
+        style="display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--gl);border-radius:9px;border:2px solid var(--g);cursor:grab">
+        <svg viewBox="0 0 40 40" width="32" height="32"><circle cx="20" cy="20" r="5" fill="#22c55e"/><circle cx="20" cy="20" r="14" fill="none" stroke="#22c55e" stroke-width="1.5"/><circle cx="34" cy="20" r="3" fill="#3b82f6"/></svg>
+        <span style="font-weight:700;font-size:.88rem">🟡 Bohr</span>
+      </div>
     `;
   }
-  r=document.getElementById('arrRes'); if(r) r.style.display='none';
+  var r=document.getElementById('arrRes'); if(r) r.style.display='none';
   spk('Atividade reiniciada! Arraste novamente os cientistas para seus modelos.');
 }
+window.resetArr = resetArr;
 window.resetArr = resetArr;
 async function saveLink() {
   url   = (document.getElementById('linkUrl')?.value||'').trim();
@@ -8143,6 +8163,7 @@ window._saveELConfigPermanent = _saveELConfigPermanent;
     window[n]=eval(n);
   });
 })();
+
 
 
 
