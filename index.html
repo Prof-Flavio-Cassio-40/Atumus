@@ -508,6 +508,7 @@ tr:hover td{background:#f8faff}
     'setBolDisc','setBolUnit','tShowModule','tOpenModal','tCloseModal',
     'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI','tOpenPEIForm',
     'tSaveAtividade','tSaveAviso','tShowAvisoDetalhe','tSendMsg',
+    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas',
     'tGerarRelatorio','tSaveProfConfig','tSaveElevenLabs',
     'tElTestar','tElTesteDirecto','tElLimpar','tSaveMaterial',
     'tAbrirNovaTurma','tSalvarTurma','tSalvarPlano',
@@ -717,6 +718,7 @@ tr:hover td{background:#f8faff}
    <div class="tnav-item" id="tnav-tNotas" onclick="tShowModule('tNotas')"><span>📋</span> Notas</div>
    <div class="tnav-item" id="tnav-tFrequencia" onclick="tShowModule('tFrequencia')"><span>📅</span> Frequência</div>
    <div class="tnav-item" id="tnav-tAtividades" onclick="tShowModule('tAtividades')"><span>✏️</span> Atividades</div>
+   <div class="tnav-item" id="tnav-tExercicios" onclick="tShowModule('tExercicios')"><span>📝</span> Exercícios</div>
    <div class="tnav-item" id="tnav-tPEI" onclick="tShowModule('tPEI')"><span>♿</span> PEI / Inclusão</div>
    <div class="tnav-item" id="tnav-tMateriais" onclick="tShowModule('tMateriais')"><span>📚</span> Materiais</div>
    <div class="tnav-item" id="tnav-tPlanejamento" onclick="tShowModule('tPlanejamento')"><span>🗓️</span> Planejamento</div>
@@ -856,6 +858,41 @@ tr:hover td{background:#f8faff}
     </select>
    </div>
    <div id="tAtivList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+  </div>
+
+  <!-- ═══ EXERCÍCIOS DE TURMA ═══ -->
+  <div class="tmod" id="tExercicios">
+   <div class="tmod-title">📝 Exercícios de Turma</div>
+   <div style="background:var(--pl);border-radius:12px;padding:11px 15px;margin-bottom:16px;border:1.5px solid var(--p);font-size:.81rem;color:var(--pd)">
+    <strong>📚 Banco de Exercícios ÁTUMUS:</strong> Questões abertas e fechadas organizadas por tópico. Acompanhe o progresso e revise as respostas abertas dos alunos.
+   </div>
+   <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+    <select id="tExercTurmaFilter" class="tsearch" style="width:170px" onchange="tLoadExercicios()">
+     <option value="">Todas as turmas</option>
+    </select>
+    <select id="tExercTopico" class="tsearch" style="width:170px" onchange="tLoadExercicios()">
+     <option value="">Todos os tópicos</option>
+     <option value="materia">🧪 Matéria e Propriedades</option>
+     <option value="substancias">🔬 Substâncias e Misturas</option>
+     <option value="modelos">⚛️ Modelos Atômicos</option>
+     <option value="estrutura">🌀 Estrutura Atômica</option>
+     <option value="radio">☢️ Radioatividade</option>
+     <option value="ligacoes">🔗 Ligações Químicas</option>
+    </select>
+    <button onclick="tLoadExercicios()" class="tbtn-primary" style="padding:7px 14px">🔄 Atualizar</button>
+   </div>
+   <!-- Tópicos resumo -->
+   <div id="tExercTopicos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:18px"></div>
+   <!-- Tabela de alunos -->
+   <div id="tExercTable"></div>
+   <!-- Modal respostas abertas -->
+   <div id="tExercRespPanel" style="display:none;margin-top:16px;background:var(--bg);border-radius:14px;border:1.5px solid var(--bd);padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+     <div style="font-weight:800;font-size:.9rem" id="tExercRespTitle">Respostas Abertas</div>
+     <button onclick="document.getElementById('tExercRespPanel').style.display='none'" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--mu)">✕</button>
+    </div>
+    <div id="tExercRespBody"></div>
+   </div>
   </div>
 
   <!-- ═══ PEI ═══ -->
@@ -1355,24 +1392,7 @@ tr:hover td{background:#f8faff}
    </div>
 
 
-   <!-- ── CALENDÁRIO MENSAL ── -->
-   <div id="calMensal" style="background:var(--sur);border-radius:var(--rr);border:1.5px solid var(--bd);padding:16px;box-shadow:var(--sh);margin-top:14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-     <button onclick="calNav(-1)" style="background:none;border:1.5px solid var(--bd);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:.9rem">‹</button>
-     <div id="calTitle" style="font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem"></div>
-     <button onclick="calNav(1)" style="background:none;border:1.5px solid var(--bd);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:.9rem">›</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-bottom:6px">
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Dom</div>
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Seg</div>
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Ter</div>
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Qua</div>
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Qui</div>
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Sex</div>
-     <div style="font-size:.65rem;font-weight:800;color:var(--mu)">Sáb</div>
-    </div>
-    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center"></div>
-   </div>
+   <!-- ── CALENDÁRIO removido daqui (agora é widget flutuante) ── -->
 
    <!-- ── TÓPICOS ── -->
    <div class="st fu2">📚 Tópicos do Capítulo</div>
@@ -1500,6 +1520,28 @@ tr:hover td{background:#f8faff}
    </div>
   </div>
  </main>
+</div>
+
+<!-- ── CALENDÁRIO FLUTUANTE (canto inferior direito) ── -->
+<div id="calWidget" style="position:fixed;bottom:18px;right:18px;z-index:900;display:none;flex-direction:column;align-items:flex-end;gap:6px">
+ <div id="calWidgetPanel" style="display:none;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);border:1.5px solid #e2e8f0;padding:14px 13px;width:242px;animation:slideUp .2s ease">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+   <button onclick="calNav(-1)" style="background:none;border:1.5px solid #e2e8f0;border-radius:7px;width:26px;height:26px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center">‹</button>
+   <div id="calTitle" style="font-family:'Sora',sans-serif;font-weight:700;font-size:.82rem;color:#1e293b"></div>
+   <button onclick="calNav(1)" style="background:none;border:1.5px solid #e2e8f0;border-radius:7px;width:26px;height:26px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center">›</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;margin-bottom:5px">
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">D</div>
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">S</div>
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">T</div>
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">Q</div>
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">Q</div>
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">S</div>
+   <div style="font-size:.58rem;font-weight:800;color:#94a3b8">S</div>
+  </div>
+  <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center"></div>
+ </div>
+ <button onclick="toggleCal()" id="calToggleBtn" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1a56db,#0e9f6e);border:none;color:#fff;font-size:1.15rem;cursor:pointer;box-shadow:0 4px 14px rgba(26,86,219,.35);display:flex;align-items:center;justify-content:center">📅</button>
 </div>
 
 <!-- MODAL TURMA -->
@@ -2859,6 +2901,124 @@ function tSaveAtividade() {
 }
 
 // ═══════════════════════════════
+// EXERCÍCIOS DE TURMA
+// ═══════════════════════════════
+var _QD_LABELS = {
+  materia:'🧪 Matéria e Propriedades',
+  substancias:'🔬 Substâncias e Misturas',
+  modelos:'⚛️ Modelos Atômicos',
+  estrutura:'🌀 Estrutura Atômica',
+  radio:'☢️ Radioatividade',
+  ligacoes:'🔗 Ligações Químicas'
+};
+var _QD_COLORS = {
+  materia:'#3b82f6',substancias:'#8b5cf6',modelos:'#f97316',
+  estrutura:'#10b981',radio:'#ef4444',ligacoes:'#ec4899'
+};
+
+async function tLoadExercicios() {
+  var turmaF = document.getElementById('tExercTurmaFilter')?.value || '';
+  var topicF = document.getElementById('tExercTopico')?.value || '';
+  var topDiv = document.getElementById('tExercTopicos');
+  var tblDiv = document.getElementById('tExercTable');
+  if (!topDiv || !tblDiv) return;
+
+  var turmasSel = document.getElementById('tExercTurmaFilter');
+  if (turmasSel && turmasSel.options.length <= 1) {
+    var turmas = [...new Set(Object.values(_DB).filter(function(u){return u.role==='aluno'&&u.turma;}).map(function(u){return u.turma;}))].sort();
+    turmas.forEach(function(t) { var o=document.createElement('option'); o.value=t; o.textContent=t; turmasSel.appendChild(o); });
+  }
+
+  var topics = topicF ? [topicF] : Object.keys(_QD_LABELS);
+  var alunos = Object.values(_DB).filter(function(u){ return u.role==='aluno' && (!turmaF || u.turma===turmaF); });
+
+  topDiv.innerHTML = topics.map(function(t) {
+    var label = _QD_LABELS[t] || t;
+    var color = _QD_COLORS[t] || '#64748b';
+    var qs = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+    var mcCount = qs.filter(function(q){return q.type==='mc';}).length;
+    var openCount = qs.filter(function(q){return q.type==='open';}).length;
+    var feitos = alunos.filter(function(u){ return (u.progress||{})[t] && (u.progress||{})[t].a > 0; }).length;
+    var pct = alunos.length ? Math.round((feitos/alunos.length)*100) : 0;
+    return '<div style="background:'+color+'18;border:1.5px solid '+color+'44;border-radius:12px;padding:13px 15px;cursor:pointer" onclick="tViewExercTopico(\''+t+'\')">'
+      +'<div style="font-weight:800;font-size:.86rem;margin-bottom:5px">'+label+'</div>'
+      +'<div style="font-size:.72rem;color:#64748b;margin-bottom:8px">🔵 '+mcCount+' fechada'+(mcCount!==1?'s':'')+' &nbsp;|&nbsp; 📝 '+openCount+' aberta'+(openCount!==1?'s':'')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;background:'+color+';width:'+pct+'%;border-radius:3px"></div></div>'
+      +'<span style="font-size:.7rem;color:#64748b;font-weight:700">'+feitos+'/'+alunos.length+' alunos</span></div></div>';
+  }).join('');
+
+  if (!alunos.length) {
+    tblDiv.innerHTML = '<div style="color:var(--mu);text-align:center;padding:20px">Nenhum aluno encontrado.</div>';
+    return;
+  }
+  var header = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.78rem"><thead><tr style="background:var(--p);color:#fff">'
+    +'<th style="padding:9px 12px;text-align:left;border-radius:8px 0 0 0">Aluno</th>'
+    +'<th style="padding:9px 8px;text-align:center">Turma</th>'
+    + topics.map(function(t){ return '<th style="padding:9px 8px;text-align:center" title="'+_QD_LABELS[t]+'">'+_QD_LABELS[t].split(' ')[0]+'</th>'; }).join('')
+    +'<th style="padding:9px 8px;text-align:center;border-radius:0 8px 0 0">Respostas</th></tr></thead><tbody>';
+  var rows = alunos.map(function(u, ri) {
+    var cells = topics.map(function(t) {
+      var prog = (u.progress||{})[t];
+      var qs = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+      var mc = qs.filter(function(q){return q.type==='mc';}).length;
+      if (!prog || !prog.a) return '<td style="padding:8px;text-align:center;color:#94a3b8">—</td>';
+      var pct2 = mc ? Math.round((prog.c/mc)*100) : 100;
+      var col = pct2>=70?'#10b981':pct2>=40?'#f59e0b':'#ef4444';
+      return '<td style="padding:8px;text-align:center"><span style="background:'+col+'20;color:'+col+';border-radius:20px;padding:2px 8px;font-weight:800">'+pct2+'%</span></td>';
+    }).join('');
+    var hasOpen = topics.some(function(t) {
+      var ans = (u.quizAnswers||{})[t];
+      if (!ans) return false;
+      var qs2 = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+      return qs2.some(function(q,qi){ return q.type==='open' && ans[qi] && String(ans[qi]).trim(); });
+    });
+    return '<tr style="background:'+(ri%2===0?'var(--bg)':'var(--surf)')+'"><td style="padding:8px 12px;font-weight:700">'+(u.nome||u.username)+'</td>'
+      +'<td style="padding:8px;text-align:center;color:var(--mu)">'+(u.turma||'—')+'</td>'
+      +cells
+      +'<td style="padding:8px;text-align:center">'+(hasOpen?'<button onclick="tViewRespostasAbertas(\''+u.username+'\')" style="background:var(--pl);color:var(--p);border:1px solid var(--p);border-radius:8px;padding:3px 9px;font-size:.72rem;font-weight:700;cursor:pointer">📝 Ver</button>':'<span style="color:#94a3b8;font-size:.72rem">—</span>')+'</td></tr>';
+  }).join('');
+  tblDiv.innerHTML = header + rows + '</tbody></table></div>';
+}
+
+function tViewExercTopico(topic) {
+  var topicF = document.getElementById('tExercTopico');
+  if (topicF) { topicF.value = topic; tLoadExercicios(); }
+}
+
+async function tViewRespostasAbertas(username) {
+  var u = await gtu(username);
+  if (!u) return;
+  var panel = document.getElementById('tExercRespPanel');
+  var title = document.getElementById('tExercRespTitle');
+  var body = document.getElementById('tExercRespBody');
+  if (!panel || !body) return;
+  title.textContent = '📝 Respostas Abertas — ' + (u.nome || username);
+  var topics = Object.keys(_QD_LABELS);
+  var html = '';
+  topics.forEach(function(t) {
+    var qs = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+    var ans = (u.quizAnswers||{})[t] || {};
+    var hasAns = qs.some(function(q,qi){ return q.type==='open' && ans[qi] && String(ans[qi]).trim(); });
+    if (!hasAns) return;
+    html += '<div style="margin-bottom:16px"><div style="font-weight:800;font-size:.83rem;color:var(--p);margin-bottom:8px">'+_QD_LABELS[t]+'</div>';
+    qs.forEach(function(q,qi) {
+      if (q.type !== 'open') return;
+      var resp = ans[qi] ? String(ans[qi]).trim() : '';
+      if (!resp) return;
+      html += '<div style="background:var(--surf);border-radius:10px;padding:10px 13px;margin-bottom:8px;border-left:3px solid var(--p)">'
+        +'<div style="font-size:.77rem;font-weight:700;margin-bottom:5px;color:var(--tx)">❓ '+q.q+'</div>'
+        +'<div style="font-size:.81rem;color:#475569;font-style:italic;margin-bottom:6px">"'+resp+'"</div>'
+        +'<div style="font-size:.72rem;color:#92400e;background:#fef3c7;border-radius:6px;padding:4px 8px">💡 Gabarito: '+q.fb+'</div></div>';
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html || '<div style="color:var(--mu);font-size:.83rem;padding:10px">Nenhuma resposta aberta registrada.</div>';
+  panel.style.display = 'block';
+  panel.scrollIntoView({behavior:'smooth'});
+}
+
+// ═══════════════════════════════
 // COMUNICAÇÃO — AVISOS
 // ═══════════════════════════════
 _tAvisos = [];
@@ -3600,6 +3760,7 @@ async function doLogout() {
   CU=null; activeModes={turma:false,pcd:false};
   b=document.getElementById('profViewBar'); if(b) b.remove();
   mn=document.getElementById('main'); if(mn) mn.style.paddingBottom='52px';
+  showCalWidget(false);
   showScreen('loginScreen');
   showAP('ap-login');
 }
@@ -3649,6 +3810,7 @@ function loadApp() {
   var tPf=document.getElementById('pTurmaPf'); if(tPf) tPf.value=u.turma||'9A';
   var rPf=document.getElementById('pRacaPf'); if(rPf) rPf.value=u.raca||'';
   updateStats(); renderBoletim(); renderAcademico(); initQuizzes(); switchMT('inicio');
+  showCalWidget(true); renderCal();
 }
 
 // ── TEACHER PANEL ──
@@ -3898,7 +4060,7 @@ function renderQz(topic,qi){var c=document.getElementById('qz-'+topic);if(!c)ret
 function selAns(t,qi,i,btn){qzState[t].ans[qi]=i;btn.closest('.qopts').querySelectorAll('.qopt').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
 function nxtQ(t,qi){var q=QD[t][qi];if(q.type==='open'){var ta=document.getElementById(`qo-${t}-${qi}`);if(ta)qzState[t].ans[qi]=ta.value;}renderQz(t,qi+1);}
 function finQ(t,qi){var q=QD[t][qi];if(q.type==='open'){var ta=document.getElementById(`qo-${t}-${qi}`);if(ta)qzState[t].ans[qi]=ta.value;}qzState[t].done=true;showQzRes(t);}
-async function showQzRes(topic){var qs=QD[topic];var st=qzState[topic];var mcQ=qs.filter(q=>q.type==='mc');ok=0;mcQ.forEach(q=>{var ri=qs.indexOf(q);if(st.ans[ri]===q.c)ok++;});var tot=mcQ.length;var score=tot?Math.round((ok/tot)*100):100;var c=document.getElementById('qz-'+topic);var review=qs.map((q,i)=>{if(q.type==='open')return`<div class="ri ri-open"><strong>❓ ${q.q}</strong><br><em>Sua resposta:</em> ${st.ans[i]||'(não respondida)'}<br><span style="color:#92400e">💡 ${q.fb}</span></div>`;var isOk=st.ans[i]===q.c;return`<div class="ri ${isOk?'ri-ok':'ri-ng'}"><strong>${isOk?'✅':'❌'} ${q.q}</strong><br>Sua: ${q.opts[st.ans[i]]??'(não respondida)'}<br>${!isOk?`Correta: ${q.opts[q.c]}<br>`:''}<em>💡 ${q.fb}</em></div>`;}).join('');c.innerHTML=`<div class="qres"><div class="qscore">${score}%</div><div style="font-size:.86rem;color:var(--mu);margin-bottom:14px">${ok} de ${tot} questões objetivas</div><div class="qreview">${review}</div><button onclick="qzState['${topic}']={ans:{},done:false};renderQz('${topic}',0)" style="margin-top:13px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">🔄 Refazer</button></div>`;if(CU){CU=await updProg(CU.username,topic,score>=50)||CU;updateStats();}}
+async function showQzRes(topic){var qs=QD[topic];var st=qzState[topic];var mcQ=qs.filter(q=>q.type==='mc');ok=0;mcQ.forEach(q=>{var ri=qs.indexOf(q);if(st.ans[ri]===q.c)ok++;});var tot=mcQ.length;var score=tot?Math.round((ok/tot)*100):100;var c=document.getElementById('qz-'+topic);var review=qs.map((q,i)=>{if(q.type==='open')return`<div class="ri ri-open"><strong>❓ ${q.q}</strong><br><em>Sua resposta:</em> ${st.ans[i]||'(não respondida)'}<br><span style="color:#92400e">💡 ${q.fb}</span></div>`;var isOk=st.ans[i]===q.c;return`<div class="ri ${isOk?'ri-ok':'ri-ng'}"><strong>${isOk?'✅':'❌'} ${q.q}</strong><br>Sua: ${q.opts[st.ans[i]]??'(não respondida)'}<br>${!isOk?`Correta: ${q.opts[q.c]}<br>`:''}<em>💡 ${q.fb}</em></div>`;}).join('');c.innerHTML=`<div class="qres"><div class="qscore">${score}%</div><div style="font-size:.86rem;color:var(--mu);margin-bottom:14px">${ok} de ${tot} questões objetivas</div><div class="qreview">${review}</div><button onclick="qzState['${topic}']={ans:{},done:false};renderQz('${topic}',0)" style="margin-top:13px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">🔄 Refazer</button></div>`;if(CU){if(!CU.quizAnswers)CU.quizAnswers={};CU.quizAnswers[topic]=Object.assign({},st.ans);CU=await updProg(CU.username,topic,score>=50)||CU;await svu(CU);updateStats();}}
 
 // ── PCD ──
 function showPA(id){document.getElementById('pcd-menu').style.display='none';document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pa-'+id)?.classList.add('active');if(id==='cruz')initCW();if(id==='lig')initLig();if(id==='tut')initTut();}
@@ -4616,6 +4778,7 @@ window.tOpenPEIForm = tOpenPEIForm; window.tOpenPEIForAluno = tOpenPEIForAluno;
 window.tSavePEI = tSavePEI; window.tRenderMateriais = tRenderMateriais;
 window.tSaveMaterial = tSaveMaterial; window.tRenderAtividades = tRenderAtividades;
 window.tSaveAtividade = tSaveAtividade; window.tSaveAviso = tSaveAviso;
+window.tLoadExercicios = tLoadExercicios; window.tViewExercTopico = tViewExercTopico; window.tViewRespostasAbertas = tViewRespostasAbertas;
 window.tShowAvisoDetalhe = tShowAvisoDetalhe; window.tLoadChat = tLoadChat; window.tSendMsg = tSendMsg;
 window.tGerarRelatorio = tGerarRelatorio; window.tSaveProfConfig = tSaveProfConfig;
 window.tUpdProfPhoto = tUpdProfPhoto; window.tSaveElevenLabs = tSaveElevenLabs;
@@ -4651,6 +4814,21 @@ function renderCal() {
 }
 function calNav(dir) { _calDate.setMonth(_calDate.getMonth()+dir); renderCal(); }
 window.calNav = calNav;
+function toggleCal() {
+  var p = document.getElementById('calWidgetPanel');
+  if (!p) return;
+  var open = p.style.display === 'block';
+  p.style.display = open ? 'none' : 'block';
+  var btn = document.getElementById('calToggleBtn');
+  if (btn) btn.textContent = open ? '📅' : '✕';
+  if (!open) renderCal();
+}
+window.toggleCal = toggleCal;
+function showCalWidget(show) {
+  var w = document.getElementById('calWidget');
+  if (w) w.style.display = show ? 'flex' : 'none';
+}
+window.showCalWidget = showCalWidget;
 
 // ── Portfolio render functions ──
 function renderLinks() {
@@ -6168,6 +6346,7 @@ function tShowModule(id) {
   if (id === 'tPEI')         tLoadPEI();
   if (id === 'tMateriais')   tRenderMateriais();
   if (id === 'tAtividades')   tRenderAtividades();
+  if (id === 'tExercicios')   tLoadExercicios();
   if (id === 'tComunicacao')  tLoadComunicacao();
   if (id === 'tConfig')       tLoadConfig();
   if (id === 'tPlanejamento') tLoadPlanos();
@@ -6787,6 +6966,124 @@ function tSaveAtividade() {
   tRenderAtividades();
   showToast('✅ Atividade criada!', 'ok');
   ['mAtivTitulo','mAtivDesc','mAtivPrazo'].forEach(id=>{ var el=document.getElementById(id); if(el)el.value=''; });
+}
+
+// ═══════════════════════════════
+// EXERCÍCIOS DE TURMA
+// ═══════════════════════════════
+var _QD_LABELS = {
+  materia:'🧪 Matéria e Propriedades',
+  substancias:'🔬 Substâncias e Misturas',
+  modelos:'⚛️ Modelos Atômicos',
+  estrutura:'🌀 Estrutura Atômica',
+  radio:'☢️ Radioatividade',
+  ligacoes:'🔗 Ligações Químicas'
+};
+var _QD_COLORS = {
+  materia:'#3b82f6',substancias:'#8b5cf6',modelos:'#f97316',
+  estrutura:'#10b981',radio:'#ef4444',ligacoes:'#ec4899'
+};
+
+async function tLoadExercicios() {
+  var turmaF = document.getElementById('tExercTurmaFilter')?.value || '';
+  var topicF = document.getElementById('tExercTopico')?.value || '';
+  var topDiv = document.getElementById('tExercTopicos');
+  var tblDiv = document.getElementById('tExercTable');
+  if (!topDiv || !tblDiv) return;
+
+  var turmasSel = document.getElementById('tExercTurmaFilter');
+  if (turmasSel && turmasSel.options.length <= 1) {
+    var turmas = [...new Set(Object.values(_DB).filter(function(u){return u.role==='aluno'&&u.turma;}).map(function(u){return u.turma;}))].sort();
+    turmas.forEach(function(t) { var o=document.createElement('option'); o.value=t; o.textContent=t; turmasSel.appendChild(o); });
+  }
+
+  var topics = topicF ? [topicF] : Object.keys(_QD_LABELS);
+  var alunos = Object.values(_DB).filter(function(u){ return u.role==='aluno' && (!turmaF || u.turma===turmaF); });
+
+  topDiv.innerHTML = topics.map(function(t) {
+    var label = _QD_LABELS[t] || t;
+    var color = _QD_COLORS[t] || '#64748b';
+    var qs = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+    var mcCount = qs.filter(function(q){return q.type==='mc';}).length;
+    var openCount = qs.filter(function(q){return q.type==='open';}).length;
+    var feitos = alunos.filter(function(u){ return (u.progress||{})[t] && (u.progress||{})[t].a > 0; }).length;
+    var pct = alunos.length ? Math.round((feitos/alunos.length)*100) : 0;
+    return '<div style="background:'+color+'18;border:1.5px solid '+color+'44;border-radius:12px;padding:13px 15px;cursor:pointer" onclick="tViewExercTopico(\''+t+'\')">'
+      +'<div style="font-weight:800;font-size:.86rem;margin-bottom:5px">'+label+'</div>'
+      +'<div style="font-size:.72rem;color:#64748b;margin-bottom:8px">🔵 '+mcCount+' fechada'+(mcCount!==1?'s':'')+' &nbsp;|&nbsp; 📝 '+openCount+' aberta'+(openCount!==1?'s':'')+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px">'
+      +'<div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;background:'+color+';width:'+pct+'%;border-radius:3px"></div></div>'
+      +'<span style="font-size:.7rem;color:#64748b;font-weight:700">'+feitos+'/'+alunos.length+' alunos</span></div></div>';
+  }).join('');
+
+  if (!alunos.length) {
+    tblDiv.innerHTML = '<div style="color:var(--mu);text-align:center;padding:20px">Nenhum aluno encontrado.</div>';
+    return;
+  }
+  var header = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.78rem"><thead><tr style="background:var(--p);color:#fff">'
+    +'<th style="padding:9px 12px;text-align:left;border-radius:8px 0 0 0">Aluno</th>'
+    +'<th style="padding:9px 8px;text-align:center">Turma</th>'
+    + topics.map(function(t){ return '<th style="padding:9px 8px;text-align:center" title="'+_QD_LABELS[t]+'">'+_QD_LABELS[t].split(' ')[0]+'</th>'; }).join('')
+    +'<th style="padding:9px 8px;text-align:center;border-radius:0 8px 0 0">Respostas</th></tr></thead><tbody>';
+  var rows = alunos.map(function(u, ri) {
+    var cells = topics.map(function(t) {
+      var prog = (u.progress||{})[t];
+      var qs = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+      var mc = qs.filter(function(q){return q.type==='mc';}).length;
+      if (!prog || !prog.a) return '<td style="padding:8px;text-align:center;color:#94a3b8">—</td>';
+      var pct2 = mc ? Math.round((prog.c/mc)*100) : 100;
+      var col = pct2>=70?'#10b981':pct2>=40?'#f59e0b':'#ef4444';
+      return '<td style="padding:8px;text-align:center"><span style="background:'+col+'20;color:'+col+';border-radius:20px;padding:2px 8px;font-weight:800">'+pct2+'%</span></td>';
+    }).join('');
+    var hasOpen = topics.some(function(t) {
+      var ans = (u.quizAnswers||{})[t];
+      if (!ans) return false;
+      var qs2 = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+      return qs2.some(function(q,qi){ return q.type==='open' && ans[qi] && String(ans[qi]).trim(); });
+    });
+    return '<tr style="background:'+(ri%2===0?'var(--bg)':'var(--surf)')+'"><td style="padding:8px 12px;font-weight:700">'+(u.nome||u.username)+'</td>'
+      +'<td style="padding:8px;text-align:center;color:var(--mu)">'+(u.turma||'—')+'</td>'
+      +cells
+      +'<td style="padding:8px;text-align:center">'+(hasOpen?'<button onclick="tViewRespostasAbertas(\''+u.username+'\')" style="background:var(--pl);color:var(--p);border:1px solid var(--p);border-radius:8px;padding:3px 9px;font-size:.72rem;font-weight:700;cursor:pointer">📝 Ver</button>':'<span style="color:#94a3b8;font-size:.72rem">—</span>')+'</td></tr>';
+  }).join('');
+  tblDiv.innerHTML = header + rows + '</tbody></table></div>';
+}
+
+function tViewExercTopico(topic) {
+  var topicF = document.getElementById('tExercTopico');
+  if (topicF) { topicF.value = topic; tLoadExercicios(); }
+}
+
+async function tViewRespostasAbertas(username) {
+  var u = await gtu(username);
+  if (!u) return;
+  var panel = document.getElementById('tExercRespPanel');
+  var title = document.getElementById('tExercRespTitle');
+  var body = document.getElementById('tExercRespBody');
+  if (!panel || !body) return;
+  title.textContent = '📝 Respostas Abertas — ' + (u.nome || username);
+  var topics = Object.keys(_QD_LABELS);
+  var html = '';
+  topics.forEach(function(t) {
+    var qs = (typeof QD !== 'undefined' && QD[t]) ? QD[t] : [];
+    var ans = (u.quizAnswers||{})[t] || {};
+    var hasAns = qs.some(function(q,qi){ return q.type==='open' && ans[qi] && String(ans[qi]).trim(); });
+    if (!hasAns) return;
+    html += '<div style="margin-bottom:16px"><div style="font-weight:800;font-size:.83rem;color:var(--p);margin-bottom:8px">'+_QD_LABELS[t]+'</div>';
+    qs.forEach(function(q,qi) {
+      if (q.type !== 'open') return;
+      var resp = ans[qi] ? String(ans[qi]).trim() : '';
+      if (!resp) return;
+      html += '<div style="background:var(--surf);border-radius:10px;padding:10px 13px;margin-bottom:8px;border-left:3px solid var(--p)">'
+        +'<div style="font-size:.77rem;font-weight:700;margin-bottom:5px;color:var(--tx)">❓ '+q.q+'</div>'
+        +'<div style="font-size:.81rem;color:#475569;font-style:italic;margin-bottom:6px">"'+resp+'"</div>'
+        +'<div style="font-size:.72rem;color:#92400e;background:#fef3c7;border-radius:6px;padding:4px 8px">💡 Gabarito: '+q.fb+'</div></div>';
+    });
+    html += '</div>';
+  });
+  body.innerHTML = html || '<div style="color:var(--mu);font-size:.83rem;padding:10px">Nenhuma resposta aberta registrada.</div>';
+  panel.style.display = 'block';
+  panel.scrollIntoView({behavior:'smooth'});
 }
 
 // ═══════════════════════════════
@@ -7535,6 +7832,7 @@ async function doLogout() {
   CU=null; activeModes={turma:false,pcd:false};
   b=document.getElementById('profViewBar'); if(b) b.remove();
   mn=document.getElementById('main'); if(mn) mn.style.paddingBottom='52px';
+  showCalWidget(false);
   showScreen('loginScreen');
   showAP('ap-login');
 }
@@ -7584,6 +7882,7 @@ function loadApp() {
   tPf=document.getElementById('pTurmaPf'); if(tPf) tPf.value=u.turma||'9A';
   rPf=document.getElementById('pRacaPf'); if(rPf) rPf.value=u.raca||'';
   updateStats(); renderBoletim(); renderAcademico(); initQuizzes(); switchMT('inicio');
+  showCalWidget(true); renderCal();
 }
 
 // ── TEACHER PANEL ──
@@ -7591,6 +7890,7 @@ async function loadTeacher() {
   if(CU) CU._vas=false;
   bar=document.getElementById('profViewBar'); if(bar) bar.remove();
   mn=document.getElementById('main'); if(mn) mn.style.paddingBottom='52px';
+  showCalWidget(false);
   showScreen('teacherScreen');
   // Info do professor no topbar e sidebar
   u=CU;
@@ -7806,7 +8106,7 @@ function renderQz(topic,qi){var c=document.getElementById('qz-'+topic);if(!c)ret
 function selAns(t,qi,i,btn){qzState[t].ans[qi]=i;btn.closest('.qopts').querySelectorAll('.qopt').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
 function nxtQ(t,qi){var q=QD[t][qi];if(q.type==='open'){var ta=document.getElementById(`qo-${t}-${qi}`);if(ta)qzState[t].ans[qi]=ta.value;}renderQz(t,qi+1);}
 function finQ(t,qi){var q=QD[t][qi];if(q.type==='open'){var ta=document.getElementById(`qo-${t}-${qi}`);if(ta)qzState[t].ans[qi]=ta.value;}qzState[t].done=true;showQzRes(t);}
-async function showQzRes(topic){var qs=QD[topic];var st=qzState[topic];var mcQ=qs.filter(q=>q.type==='mc');var ok=0;mcQ.forEach(q=>{var ri=qs.indexOf(q);if(st.ans[ri]===q.c)ok++;});var tot=mcQ.length;var score=tot?Math.round((ok/tot)*100):100;var c=document.getElementById('qz-'+topic);var review=qs.map((q,i)=>{if(q.type==='open')return`<div class="ri ri-open"><strong>❓ ${q.q}</strong><br><em>Sua resposta:</em> ${st.ans[i]||'(não respondida)'}<br><span style="color:#92400e">💡 ${q.fb}</span></div>`;var isOk=st.ans[i]===q.c;return`<div class="ri ${isOk?'ri-ok':'ri-ng'}"><strong>${isOk?'✅':'❌'} ${q.q}</strong><br>Sua: ${q.opts[st.ans[i]]??'(não respondida)'}<br>${!isOk?`Correta: ${q.opts[q.c]}<br>`:''}<em>💡 ${q.fb}</em></div>`;}).join('');c.innerHTML=`<div class="qres"><div class="qscore">${score}%</div><div style="font-size:.86rem;color:var(--mu);margin-bottom:14px">${ok} de ${tot} questões objetivas</div><div class="qreview">${review}</div><button onclick="qzState['${topic}']={ans:{},done:false};renderQz('${topic}',0)" style="margin-top:13px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">🔄 Refazer</button></div>`;if(CU){CU=await updProg(CU.username,topic,score>=50)||CU;updateStats();}}
+async function showQzRes(topic){var qs=QD[topic];var st=qzState[topic];var mcQ=qs.filter(q=>q.type==='mc');var ok=0;mcQ.forEach(q=>{var ri=qs.indexOf(q);if(st.ans[ri]===q.c)ok++;});var tot=mcQ.length;var score=tot?Math.round((ok/tot)*100):100;var c=document.getElementById('qz-'+topic);var review=qs.map((q,i)=>{if(q.type==='open')return`<div class="ri ri-open"><strong>❓ ${q.q}</strong><br><em>Sua resposta:</em> ${st.ans[i]||'(não respondida)'}<br><span style="color:#92400e">💡 ${q.fb}</span></div>`;var isOk=st.ans[i]===q.c;return`<div class="ri ${isOk?'ri-ok':'ri-ng'}"><strong>${isOk?'✅':'❌'} ${q.q}</strong><br>Sua: ${q.opts[st.ans[i]]??'(não respondida)'}<br>${!isOk?`Correta: ${q.opts[q.c]}<br>`:''}<em>💡 ${q.fb}</em></div>`;}).join('');c.innerHTML=`<div class="qres"><div class="qscore">${score}%</div><div style="font-size:.86rem;color:var(--mu);margin-bottom:14px">${ok} de ${tot} questões objetivas</div><div class="qreview">${review}</div><button onclick="qzState['${topic}']={ans:{},done:false};renderQz('${topic}',0)" style="margin-top:13px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">🔄 Refazer</button></div>`;if(CU){if(!CU.quizAnswers)CU.quizAnswers={};CU.quizAnswers[topic]=Object.assign({},st.ans);CU=await updProg(CU.username,topic,score>=50)||CU;await svu(CU);updateStats();}}
 
 // ── PCD ──
 function showPA(id){document.getElementById('pcd-menu').style.display='none';document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pa-'+id)?.classList.add('active');if(id==='cruz')initCW();if(id==='lig')initLig();if(id==='tut')initTut();}
@@ -7921,9 +8221,10 @@ function initCW(){
   kb=document.getElementById('cwKbd');if(!kb)return;kb.innerHTML='';
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l,i){
     var b=document.createElement('button');b.textContent=l;b.id='cwb-'+l;
-    b.style.cssText='background:'+CW_COLORS[i%CW_COLORS.length]+';color:#fff;border:none;border-radius:8px;width:34px;height:34px;font-weight:800;cursor:pointer;font-family:Sora,sans-serif;font-size:.9rem;transition:all .15s;box-shadow:0 2px 5px rgba(0,0,0,.18)';
-    b.onmousedown=function(){b.style.transform='scale(.85)';};
-    b.onmouseup=function(){b.style.transform='scale(1)';typeCW(l);};
+    b.style.cssText='background:'+CW_COLORS[i%CW_COLORS.length]+';color:#fff;border:none;border-radius:8px;width:36px;height:36px;font-weight:800;cursor:pointer;font-family:Sora,sans-serif;font-size:.9rem;transition:all .15s;box-shadow:0 2px 5px rgba(0,0,0,.18);touch-action:manipulation';
+    (function(letter,btn){
+      btn.onclick=function(){btn.style.transform='scale(.85)';setTimeout(function(){btn.style.transform='scale(1)';},150);typeCW(letter);};
+    })(l,b);
     kb.appendChild(b);
   });
   var clr=document.createElement('button');clr.textContent='⌫';clr.style.cssText='background:#ef4444;color:#fff;border:none;border-radius:8px;width:44px;height:34px;font-weight:800;cursor:pointer;font-size:.9rem';
@@ -8232,6 +8533,7 @@ window.tOpenPEIForm = tOpenPEIForm; window.tOpenPEIForAluno = tOpenPEIForAluno;
 window.tSavePEI = tSavePEI; window.tRenderMateriais = tRenderMateriais;
 window.tSaveMaterial = tSaveMaterial; window.tRenderAtividades = tRenderAtividades;
 window.tSaveAtividade = tSaveAtividade; window.tSaveAviso = tSaveAviso;
+window.tLoadExercicios = tLoadExercicios; window.tViewExercTopico = tViewExercTopico; window.tViewRespostasAbertas = tViewRespostasAbertas;
 window.tShowAvisoDetalhe = tShowAvisoDetalhe; window.tLoadChat = tLoadChat; window.tSendMsg = tSendMsg;
 window.tGerarRelatorio = tGerarRelatorio; window.tSaveProfConfig = tSaveProfConfig;
 window.tUpdProfPhoto = tUpdProfPhoto; window.tSaveElevenLabs = tSaveElevenLabs;
@@ -8353,6 +8655,21 @@ function renderCal() {
 }
 function calNav(dir) { _calDate.setMonth(_calDate.getMonth()+dir); renderCal(); }
 window.calNav = calNav;
+function toggleCal() {
+  var p = document.getElementById('calWidgetPanel');
+  if (!p) return;
+  var open = p.style.display === 'block';
+  p.style.display = open ? 'none' : 'block';
+  var btn = document.getElementById('calToggleBtn');
+  if (btn) btn.textContent = open ? '📅' : '✕';
+  if (!open) renderCal();
+}
+window.toggleCal = toggleCal;
+function showCalWidget(show) {
+  var w = document.getElementById('calWidget');
+  if (w) w.style.display = show ? 'flex' : 'none';
+}
+window.showCalWidget = showCalWidget;
 
 // ── Portfolio render functions ──
 function renderLinks() {
@@ -8457,6 +8774,7 @@ window._saveELConfigPermanent = _saveELConfigPermanent;
     'setBolDisc','setBolUnit','tShowModule','tOpenModal','tCloseModal',
     'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI','tOpenPEIForm',
     'tSaveAtividade','tSaveAviso','tShowAvisoDetalhe','tSendMsg',
+    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas',
     'tGerarRelatorio','tSaveProfConfig','tSaveElevenLabs',
     'tElTestar','tElTesteDirecto','tElLimpar','tSaveMaterial',
     'tAbrirNovaTurma','tSalvarTurma','tSalvarPlano',
