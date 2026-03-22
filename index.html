@@ -6171,6 +6171,15 @@ async function loadTeacher() {
   if (nm) nm.textContent = u.nome || 'Professor';
   dc = document.getElementById('tProfDisc');
   if (dc) dc.textContent = (u.disciplina || '') + (u.formacao ? ' • ' + u.formacao : '');
+  // Atualiza avatar e nome no sidebar
+  ['sbAv','chipAv'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (u.photo) el.innerHTML = '<img src="' + u.photo + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    else el.textContent = ini;
+  });
+  var sbN = document.getElementById('sbName'); if (sbN) sbN.textContent = u.nome || 'Professor';
+  var sbI = document.getElementById('sbInfo'); if (sbI) sbI.textContent = u.disciplina || 'Professor';
   tShowModule('tDashboard');
 }
 
