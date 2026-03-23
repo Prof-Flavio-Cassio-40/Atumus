@@ -8256,41 +8256,73 @@ function initCW(){
   window._cwa=ans;
   // Teclado colorido A-Z
   kb=document.getElementById('cwKbd');if(!kb)return;kb.innerHTML='';
+  kb.style.cssText='display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:14px 0;padding:12px 10px;background:linear-gradient(135deg,#f0f9ff,#faf5ff);border-radius:18px;border:2px solid #e2e8f0;box-shadow:0 2px 10px rgba(0,0,0,.06)';
+  // Instrução no topo do teclado
+  var inst=document.createElement('div');
+  inst.style.cssText='width:100%;text-align:center;font-size:.78rem;font-weight:700;color:#7c3aed;margin-bottom:6px;';
+  inst.textContent='👆 Clique em uma célula da grade e depois escolha a letra:';
+  kb.appendChild(inst);
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l,i){
     var b=document.createElement('button');b.textContent=l;b.id='cwb-'+l;
-    b.style.cssText='background:'+CW_COLORS[i%CW_COLORS.length]+';color:#fff;border:none;border-radius:8px;width:36px;height:36px;font-weight:800;cursor:pointer;font-family:Sora,sans-serif;font-size:.9rem;transition:all .15s;box-shadow:0 2px 5px rgba(0,0,0,.18);touch-action:manipulation';
+    b.style.cssText='background:'+CW_COLORS[i%CW_COLORS.length]+';color:#fff;border:none;border-radius:10px;width:46px;height:46px;font-weight:900;cursor:pointer;font-family:Sora,sans-serif;font-size:1.05rem;transition:all .15s;box-shadow:0 3px 8px rgba(0,0,0,.22);touch-action:manipulation;margin:2px';
     (function(letter,btn){
-      btn.onclick=function(){btn.style.transform='scale(.85)';setTimeout(function(){btn.style.transform='scale(1)';},150);typeCW(letter);};
+      btn.onclick=function(){
+        btn.style.transform='scale(.82)';
+        setTimeout(function(){btn.style.transform='scale(1)';},160);
+        if(!selCWC){spk('Primeiro clique em uma célula da grade para escolher onde colocar a letra!');return;}
+        typeCW(letter);
+      };
     })(l,b);
     kb.appendChild(b);
   });
-  var clr=document.createElement('button');clr.textContent='⌫';clr.style.cssText='background:#ef4444;color:#fff;border:none;border-radius:8px;width:44px;height:34px;font-weight:800;cursor:pointer;font-size:.9rem';
-  clr.onclick=function(){if(!selCWC)return;selCWC.textContent='';selCWC.classList.remove('ok','err');selCWC.style.background='';selCWC.style.borderColor='';selCWC.style.color='';};
+  // Botão apagar
+  var clr=document.createElement('button');clr.textContent='⌫ Apagar';
+  clr.style.cssText='background:#ef4444;color:#fff;border:none;border-radius:10px;padding:0 14px;height:46px;font-weight:800;cursor:pointer;font-size:.88rem;margin:2px;box-shadow:0 3px 8px rgba(0,0,0,.2)';
+  clr.onclick=function(){
+    if(!selCWC){spk('Clique em uma célula primeiro!');return;}
+    selCWC.textContent='';selCWC.classList.remove('ok','err');
+    selCWC.style.background='';selCWC.style.borderColor='';selCWC.style.color='';
+    spk('Letra apagada!');
+  };
   kb.appendChild(clr);
-  var chk=document.createElement('button');chk.textContent='✓ Verificar';chk.style.cssText='background:var(--g);color:#fff;border:none;border-radius:8px;padding:0 14px;height:34px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif';chk.onclick=checkCW;kb.appendChild(chk);
-  var rst=document.createElement('button');rst.textContent='🔄 Reiniciar';rst.style.cssText='background:var(--p);color:#fff;border:none;border-radius:8px;padding:0 14px;height:34px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif';rst.onclick=initCW;kb.appendChild(rst);
+  // Botão verificar
+  var chk=document.createElement('button');chk.textContent='✓ Verificar';
+  chk.style.cssText='background:#22c55e;color:#fff;border:none;border-radius:10px;padding:0 16px;height:46px;font-weight:800;cursor:pointer;font-size:.88rem;margin:2px;box-shadow:0 3px 8px rgba(0,0,0,.2)';
+  chk.onclick=function(){spk('Verificando suas respostas!');checkCW();};
+  kb.appendChild(chk);
+  // Botão reiniciar
+  var rst=document.createElement('button');rst.textContent='🔄 Nova';
+  rst.style.cssText='background:#8b5cf6;color:#fff;border:none;border-radius:10px;padding:0 14px;height:46px;font-weight:800;cursor:pointer;font-size:.88rem;margin:2px;box-shadow:0 3px 8px rgba(0,0,0,.2)';
+  rst.onclick=function(){spk('Reiniciando a cruzadinha!');initCW();};
+  kb.appendChild(rst);
   selCWC=null;
-  // Lê as dicas em voz
-  setTimeout(function(){spk('Cruzadinha de Ciências! Ouça as dicas. ' + CW_CLUES.join('. '));},600);
+  // Lê instrução e dicas em voz
+  setTimeout(function(){spk('Cruzadinha de Ciências! Clique em uma célula da grade e depois escolha a letra no teclado colorido! As dicas são: ' + CW_CLUES.join('. '));},600);
 }
 selCWC=null;
 function selCW(el){
-  document.querySelectorAll('.cw-cell.ac').forEach(function(c){c.style.outline='';});
+  document.querySelectorAll('.cw-cell.ac').forEach(function(c){c.style.outline='';c.style.boxShadow='';});
   selCWC=el;
-  el.style.outline='3px solid var(--v)';
-  // Voz: fala a letra atual se já preenchida
-  if(el.textContent.trim()) spk(el.textContent.trim());
+  el.style.outline='4px solid #7c3aed';
+  el.style.boxShadow='0 0 14px 4px rgba(124,58,237,.35)';
+  var txt=el.textContent.trim();
+  if(txt) spk('Célula com a letra ' + txt + '. Você pode trocar usando o teclado!');
+  else spk('Célula vazia selecionada! Agora escolha uma letra no teclado colorido!');
 }
 function typeCW(l){
   if(!selCWC)return;
   selCWC.textContent=l;
   selCWC.classList.remove('ok','err');
-  selCWC.style.background='';selCWC.style.borderColor='';selCWC.style.color='';
-  spk(l);
-  // Avança para próxima célula
+  selCWC.style.background='#ede9fe';selCWC.style.borderColor='#7c3aed';selCWC.style.color='#4c1d95';
+  spk('Letra ' + l + '!');
+  // Avança para próxima célula automaticamente
   var cs=Array.from(document.querySelectorAll('.cw-cell.ac'));
   var idx=cs.indexOf(selCWC);
-  if(idx<cs.length-1) selCW(cs[idx+1]);
+  if(idx<cs.length-1){
+    setTimeout(function(){selCW(cs[idx+1]);},300);
+  } else {
+    spk('Você preencheu todas as letras! Clique em Verificar para conferir!');
+  }
 }
 async function checkCW(){
   var ans=window._cwa;if(!ans)return;
