@@ -508,7 +508,7 @@ tr:hover td{background:#f8faff}
     'setBolDisc','setBolUnit','tShowModule','tOpenModal','tCloseModal',
     'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI','tOpenPEIForm',
     'tSaveAtividade','tSaveAviso','tShowAvisoDetalhe','tSendMsg',
-    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas',
+    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas','tOpenNovoMaterial','tSaveNovoMaterial','tDeleteMaterial','renderMateriaisTopico',
     'tGerarRelatorio','tSaveProfConfig','tSaveElevenLabs',
     'tElTestar','tElTesteDirecto','tElLimpar','tSaveMaterial',
     'tAbrirNovaTurma','tSalvarTurma','tSalvarPlano',
@@ -868,6 +868,7 @@ tr:hover td{background:#f8faff}
    </div>
    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
     <button onclick="tOpenNovoExerc()" class="tbtn-primary">➕ Novo Exercício</button>
+    <button onclick="tOpenNovoMaterial()" class="tbtn-primary" style="background:linear-gradient(135deg,#0e9f6e,#1a56db)">📎 Adicionar Material</button>
     <select id="tExercTurmaFilter" class="tsearch" style="width:170px" onchange="tLoadExercicios()">
      <option value="">Todas as turmas</option>
     </select>
@@ -1198,6 +1199,43 @@ tr:hover td{background:#f8faff}
   <div class="tmodal-box" style="max-width:560px">
    <div class="tmodal-hdr" id="tModalAvisoHdr">📢 Aviso <button class="tmodal-close" onclick="tCloseModal('tModalAvisoDetalhe')">✕</button></div>
    <div class="tmodal-body" id="tModalAvisoBody"></div>
+  </div>
+ </div>
+
+ <!-- Modal Novo Material -->
+ <div class="tmodal" id="tModalNovoMaterial">
+  <div class="tmodal-box">
+   <div class="tmodal-hdr"><span>📎</span> Adicionar Material <button class="tmodal-close" onclick="tCloseModal('tModalNovoMaterial')">✕</button></div>
+   <div class="tmodal-body">
+    <div class="fg"><label class="fl">Tópico</label>
+     <select id="mMatTopico" class="finput">
+      <option value="">📚 Todos os tópicos</option>
+      <option value="materia">🧪 Matéria e Propriedades</option>
+      <option value="substancias">🔬 Substâncias e Misturas</option>
+      <option value="modelos">⚛️ Modelos Atômicos</option>
+      <option value="estrutura">🌀 Estrutura Atômica</option>
+      <option value="radio">☢️ Radioatividade</option>
+      <option value="ligacoes">🔗 Ligações Químicas</option>
+     </select>
+    </div>
+    <div class="fg"><label class="fl">Tipo de material</label>
+     <select id="mMatTipo" class="finput">
+      <option value="pdf">📄 PDF / Arquivo</option>
+      <option value="video">🎬 Vídeo YouTube</option>
+      <option value="link">🔗 Link externo</option>
+     </select>
+    </div>
+    <div class="fg"><label class="fl">Título</label>
+     <input id="mMatTitulo" class="finput" placeholder="Ex: Apostila de Matéria" />
+    </div>
+    <div class="fg"><label class="fl">URL / Link</label>
+     <input id="mMatUrl" class="finput" placeholder="https://..." />
+    </div>
+    <div class="fg"><label class="fl">Turma (deixe vazio para todas)</label>
+     <input id="mMatTurma" class="finput" placeholder="Ex: 9A ou vazio para todos" />
+    </div>
+    <button onclick="tSaveNovoMaterial()" class="tbtn-primary" style="width:100%;margin-top:6px">💾 Salvar Material</button>
+   </div>
   </div>
  </div>
 
@@ -1592,12 +1630,12 @@ tr:hover td{background:#f8faff}
     <button class="tnav-btn" onclick="showCS('radio',this)">☢️ Radioatividade</button>
     <button class="tnav-btn" onclick="showCS('ligacoes',this)">🔗 Ligações</button>
    </div>
-   <div class="csec active" id="cs-materia"><div class="cbox"><h3>🧪 A Matéria e suas Propriedades</h3><p>A matéria é tudo que tem massa e ocupa lugar no espaço. <strong>Densidade</strong>: d = m/V. <strong>Fusão</strong>: sólido→líquido. <strong>Ebulição</strong>: líquido→gasoso. Cada substância possui temperaturas características.</p></div><div id="qz-materia" class="qc" data-topic="materia" data-q="0" data-ans="{}"></div></div>
-   <div class="csec" id="cs-substancias"><div class="cbox"><h3>🔬 Substâncias e Misturas</h3><p><strong>Simples</strong>: um elemento (H₂, N₂, He). <strong>Compostas</strong>: dois ou mais (NaNO₃, H₂O). <strong>Homogênea</strong>: componentes indistinguíveis. <strong>Heterogênea</strong>: componentes visíveis.</p></div><div id="qz-substancias" class="qc" data-topic="substancias" data-q="0" data-ans="{}"></div></div>
-   <div class="csec" id="cs-modelos"><div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><div class="atom-c"><div class="orb o1"><div class="elec"></div></div><div class="orb o2"><div class="elec"></div></div><div class="orb o3"><div class="elec"></div></div><div class="atom-nuc">p⁺ n⁰</div></div><div style="flex:1;min-width:180px"><div class="cbox"><h3>⚛️ Modelos Atômicos</h3><p><strong>Dalton</strong>: esfera maciça. <strong>Thomson</strong>: pudim de passas. <strong>Rutherford</strong>: núcleo denso. <strong>Bohr</strong>: órbitas definidas.</p></div></div></div><div id="qz-modelos" class="qc" data-topic="modelos" data-q="0" data-ans="{}"></div></div>
-   <div class="csec" id="cs-estrutura"><div class="cbox"><h3>🌀 Estrutura Atômica</h3><p><strong>Z</strong>: prótons. <strong>A</strong>: prótons+nêutrons. <strong>Cátion</strong>: perdeu e⁻ (carga+). <strong>Ânion</strong>: ganhou e⁻ (carga–). <strong>Isótopos</strong>: mesmo Z, A diferente.</p></div><div id="qz-estrutura" class="qc" data-topic="estrutura" data-q="0" data-ans="{}"></div></div>
-   <div class="csec" id="cs-radio"><div class="cbox"><h3>☢️ Radioatividade</h3><p><strong>Meia-vida</strong>: tempo para metade dos átomos se desintegrarem. m = m₀ ÷ 2ⁿ. Cada período divide a massa pela metade.</p></div><div id="qz-radio" class="qc" data-topic="radio" data-q="0" data-ans="{}"></div></div>
-   <div class="csec" id="cs-ligacoes"><div class="cbox"><h3>🔗 Ligações Químicas</h3><p><strong>Iônica</strong>: transferência e⁻ (NaCl). <strong>Covalente simples</strong>: 1 par (H–H). <strong>Dupla</strong>: 2 pares (O=O). <strong>Tripla</strong>: 3 pares (N≡N).</p></div><div id="qz-ligacoes" class="qc" data-topic="ligacoes" data-q="0" data-ans="{}"></div></div>
+   <div class="csec active" id="cs-materia"><div class="cbox"><h3>🧪 A Matéria e suas Propriedades</h3><p>A matéria é tudo que tem massa e ocupa lugar no espaço. <strong>Densidade</strong>: d = m/V. <strong>Fusão</strong>: sólido→líquido. <strong>Ebulição</strong>: líquido→gasoso. Cada substância possui temperaturas características.</p></div><div id="qz-materia" class="qc" data-topic="materia" data-q="0" data-ans="{}"></div><div id="mat-materia" style="margin-top:10px"></div></div>
+   <div class="csec" id="cs-substancias"><div class="cbox"><h3>🔬 Substâncias e Misturas</h3><p><strong>Simples</strong>: um elemento (H₂, N₂, He). <strong>Compostas</strong>: dois ou mais (NaNO₃, H₂O). <strong>Homogênea</strong>: componentes indistinguíveis. <strong>Heterogênea</strong>: componentes visíveis.</p></div><div id="qz-substancias" class="qc" data-topic="substancias" data-q="0" data-ans="{}"></div><div id="mat-substancias" style="margin-top:10px"></div></div>
+   <div class="csec" id="cs-modelos"><div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:12px"><div class="atom-c"><div class="orb o1"><div class="elec"></div></div><div class="orb o2"><div class="elec"></div></div><div class="orb o3"><div class="elec"></div></div><div class="atom-nuc">p⁺ n⁰</div></div><div style="flex:1;min-width:180px"><div class="cbox"><h3>⚛️ Modelos Atômicos</h3><p><strong>Dalton</strong>: esfera maciça. <strong>Thomson</strong>: pudim de passas. <strong>Rutherford</strong>: núcleo denso. <strong>Bohr</strong>: órbitas definidas.</p></div></div></div><div id="qz-modelos" class="qc" data-topic="modelos" data-q="0" data-ans="{}"></div><div id="mat-modelos" style="margin-top:10px"></div></div>
+   <div class="csec" id="cs-estrutura"><div class="cbox"><h3>🌀 Estrutura Atômica</h3><p><strong>Z</strong>: prótons. <strong>A</strong>: prótons+nêutrons. <strong>Cátion</strong>: perdeu e⁻ (carga+). <strong>Ânion</strong>: ganhou e⁻ (carga–). <strong>Isótopos</strong>: mesmo Z, A diferente.</p></div><div id="qz-estrutura" class="qc" data-topic="estrutura" data-q="0" data-ans="{}"></div><div id="mat-estrutura" style="margin-top:10px"></div></div>
+   <div class="csec" id="cs-radio"><div class="cbox"><h3>☢️ Radioatividade</h3><p><strong>Meia-vida</strong>: tempo para metade dos átomos se desintegrarem. m = m₀ ÷ 2ⁿ. Cada período divide a massa pela metade.</p></div><div id="qz-radio" class="qc" data-topic="radio" data-q="0" data-ans="{}"></div><div id="mat-radio" style="margin-top:10px"></div></div>
+   <div class="csec" id="cs-ligacoes"><div class="cbox"><h3>🔗 Ligações Químicas</h3><p><strong>Iônica</strong>: transferência e⁻ (NaCl). <strong>Covalente simples</strong>: 1 par (H–H). <strong>Dupla</strong>: 2 pares (O=O). <strong>Tripla</strong>: 3 pares (N≡N).</p></div><div id="qz-ligacoes" class="qc" data-topic="ligacoes" data-q="0" data-ans="{}"></div><div id="mat-ligacoes" style="margin-top:10px"></div></div>
   </div>
  </div>
 </div>
@@ -3890,6 +3928,7 @@ function loadApp() {
   var rPf=document.getElementById('pRacaPf'); if(rPf) rPf.value=u.raca||'';
   updateStats(); renderBoletim(); renderAcademico(); initQuizzes(); switchMT('inicio');
   showCalWidget(true); renderCal();
+  if(typeof initMateriaisAluno==='function') initMateriaisAluno();
 }
 
 // ── TEACHER PANEL ──
@@ -4123,7 +4162,7 @@ function openTM(sec){activeModes.turma=true;updModes();document.getElementById('
 function closeTM(){document.getElementById('moTurma').classList.remove('active');}
 function openPCD(){activeModes.pcd=true;updModes();document.getElementById('moPCD').classList.add('active');}
 function closePCD(){document.getElementById('moPCD').classList.remove('active');}
-function showCS(id,btn){document.querySelectorAll('.csec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tnav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('cs-'+id)?.classList.add('active');btn?.classList.add('active');}
+function showCS(id,btn){document.querySelectorAll('.csec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tnav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('cs-'+id)?.classList.add('active');btn?.classList.add('active');if(typeof renderMateriaisTopico==='function')renderMateriaisTopico(id);}
 
 // ── QUIZ ──
 var QD={
@@ -7962,6 +8001,7 @@ function loadApp() {
   rPf=document.getElementById('pRacaPf'); if(rPf) rPf.value=u.raca||'';
   updateStats(); renderBoletim(); renderAcademico(); initQuizzes(); switchMT('inicio');
   showCalWidget(true); renderCal();
+  if(typeof initMateriaisAluno==='function') initMateriaisAluno();
 }
 
 // ── TEACHER PANEL ──
@@ -8169,7 +8209,7 @@ function openTM(sec){activeModes.turma=true;updModes();document.getElementById('
 function closeTM(){document.getElementById('moTurma').classList.remove('active');}
 function openPCD(){activeModes.pcd=true;updModes();document.getElementById('moPCD').classList.add('active');}
 function closePCD(){document.getElementById('moPCD').classList.remove('active');}
-function showCS(id,btn){document.querySelectorAll('.csec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tnav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('cs-'+id)?.classList.add('active');btn?.classList.add('active');}
+function showCS(id,btn){document.querySelectorAll('.csec').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.tnav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('cs-'+id)?.classList.add('active');btn?.classList.add('active');if(typeof renderMateriaisTopico==='function')renderMateriaisTopico(id);}
 
 // ── QUIZ ──
 QD={
@@ -8650,6 +8690,101 @@ window._cfgTab = _cfgTab;
 
 
 // ══════════════════════════════════════════
+// MATERIAIS POR TÓPICO (PROFESSOR + ALUNO)
+// ══════════════════════════════════════════
+var _materiaisDB = [];
+async function _loadMateriais() {
+  var entry = await gtu('__materiais__');
+  _materiaisDB = (entry && entry.lista) ? entry.lista : [];
+}
+async function _saveMateriais() {
+  await svu({ username: '__materiais__', role: 'system', lista: _materiaisDB });
+}
+
+function tOpenNovoMaterial() {
+  var f = ['mMatTopico','mMatTipo','mMatTitulo','mMatUrl','mMatTurma'];
+  f.forEach(function(id){ var el=document.getElementById(id); if(el) el.value = id==='mMatTipo'?'pdf':id==='mMatTopico'?'':''; });
+  tOpenModal('tModalNovoMaterial');
+}
+
+async function tSaveNovoMaterial() {
+  var titulo = (document.getElementById('mMatTitulo')?.value||'').trim();
+  var url    = (document.getElementById('mMatUrl')?.value||'').trim();
+  var topic  = document.getElementById('mMatTopico')?.value || '';
+  var tipo   = document.getElementById('mMatTipo')?.value || 'link';
+  var turma  = (document.getElementById('mMatTurma')?.value||'').trim();
+  if (!titulo) { showToast('Digite o título', 'err'); return; }
+  if (!url)    { showToast('Digite a URL', 'err'); return; }
+  await _loadMateriais();
+  _materiaisDB.push({ id: Date.now(), topic: topic, tipo: tipo, titulo: titulo, url: url, turma: turma });
+  await _saveMateriais();
+  tCloseModal('tModalNovoMaterial');
+  showToast('✅ Material salvo!', 'ok');
+  renderMateriaisTopico(topic || null);
+}
+
+async function tDeleteMaterial(id) {
+  await _loadMateriais();
+  _materiaisDB = _materiaisDB.filter(function(m){ return m.id !== id; });
+  await _saveMateriais();
+  showToast('Material removido', 'ok');
+  renderMateriaisTopico(null);
+}
+window.tOpenNovoMaterial = tOpenNovoMaterial;
+window.tSaveNovoMaterial = tSaveNovoMaterial;
+window.tDeleteMaterial = tDeleteMaterial;
+
+// Renderiza materiais para o aluno em um tópico específico
+async function renderMateriaisTopico(topic) {
+  var topics = topic ? [topic] : ['materia','substancias','modelos','estrutura','radio','ligacoes'];
+  await _loadMateriais();
+  var turmaAluno = (CU && CU.turma) ? CU.turma : '';
+  var isProf = CU && CU.role === 'professor';
+  topics.forEach(function(t) {
+    var div = document.getElementById('mat-' + t);
+    if (!div) return;
+    var mats = _materiaisDB.filter(function(m){
+      var topicOk = !m.topic || m.topic === t;
+      var turmaOk = !m.turma || m.turma === turmaAluno || isProf;
+      return topicOk && turmaOk;
+    });
+    if (!mats.length) { div.innerHTML = ''; return; }
+    div.innerHTML = '<div style="background:linear-gradient(135deg,#f0f9ff,#faf5ff);border-radius:14px;border:1.5px solid #c4b5fd;padding:14px;margin-top:10px">'
+      + '<div style="font-weight:800;font-size:.85rem;color:#7c3aed;margin-bottom:10px">📎 Materiais do Professor</div>'
+      + mats.map(function(m){
+          var icon = m.tipo==='pdf' ? '📄' : m.tipo==='video' ? '🎬' : '🔗';
+          var content = '';
+          if (m.tipo === 'video') {
+            var vid = '';
+            var ym = m.url.match(/(?:v=|youtu\.be\/)([^&?\/]+)/);
+            if (ym) vid = ym[1];
+            content = vid
+              ? '<div style="margin-top:8px;border-radius:10px;overflow:hidden"><iframe width="100%" height="200" src="https://www.youtube.com/embed/'+vid+'" frameborder="0" allowfullscreen style="border-radius:10px"></iframe></div>'
+              : '<a href="'+m.url+'" target="_blank" style="color:#1a56db;font-size:.8rem">🔗 Abrir vídeo</a>';
+          } else if (m.tipo === 'pdf') {
+            content = '<a href="'+m.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#1a56db;color:#fff;border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:700;margin-top:6px;text-decoration:none">📄 Abrir PDF</a>';
+          } else {
+            content = '<a href="'+m.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#0e9f6e;color:#fff;border-radius:8px;padding:6px 14px;font-size:.8rem;font-weight:700;margin-top:6px;text-decoration:none">🔗 Acessar link</a>';
+          }
+          var delBtn = isProf ? ' <button onclick="tDeleteMaterial('+m.id+')" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.75rem;float:right" title="Remover">🗑️</button>' : '';
+          return '<div style="background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #e2e8f0">'
+            + '<div style="font-weight:700;font-size:.83rem">'+icon+' '+m.titulo+delBtn+'</div>'
+            + (m.turma ? '<div style="font-size:.7rem;color:#64748b;margin-top:2px">Turma: '+m.turma+'</div>' : '')
+            + content
+            + '</div>';
+        }).join('')
+      + '</div>';
+  });
+}
+window.renderMateriaisTopico = renderMateriaisTopico;
+
+// Inicializa materiais ao carregar turma
+async function initMateriaisAluno() {
+  await renderMateriaisTopico(null);
+}
+window.initMateriaisAluno = initMateriaisAluno;
+
+// ══════════════════════════════════════════
 // CRIAÇÃO DE EXERCÍCIOS (PROFESSOR)
 // ══════════════════════════════════════════
 var _exercDB = [];
@@ -9041,7 +9176,7 @@ window._saveELConfigPermanent = _saveELConfigPermanent;
     'setBolDisc','setBolUnit','tShowModule','tOpenModal','tCloseModal',
     'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI','tOpenPEIForm',
     'tSaveAtividade','tSaveAviso','tShowAvisoDetalhe','tSendMsg',
-    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas',
+    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas','tOpenNovoMaterial','tSaveNovoMaterial','tDeleteMaterial','renderMateriaisTopico',
     'tGerarRelatorio','tSaveProfConfig','tSaveElevenLabs',
     'tElTestar','tElTesteDirecto','tElLimpar','tSaveMaterial',
     'tAbrirNovaTurma','tSalvarTurma','tSalvarPlano',
