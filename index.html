@@ -1208,7 +1208,7 @@ tr:hover td{background:#f8faff}
    <div class="tmodal-hdr"><span>📎</span> Adicionar Material <button class="tmodal-close" onclick="tCloseModal('tModalNovoMaterial')">✕</button></div>
    <div class="tmodal-body">
     <div class="fg"><label class="fl">Tópico</label>
-     <select id="mMatTopico" class="finput">
+     <select id="mNMTopico" class="finput">
       <option value="">📚 Todos os tópicos</option>
       <option value="materia">🧪 Matéria e Propriedades</option>
       <option value="substancias">🔬 Substâncias e Misturas</option>
@@ -1219,20 +1219,20 @@ tr:hover td{background:#f8faff}
      </select>
     </div>
     <div class="fg"><label class="fl">Tipo de material</label>
-     <select id="mMatTipo" class="finput">
+     <select id="mNMTipo" class="finput">
       <option value="pdf">📄 PDF / Arquivo</option>
       <option value="video">🎬 Vídeo YouTube</option>
       <option value="link">🔗 Link externo</option>
      </select>
     </div>
     <div class="fg"><label class="fl">Título</label>
-     <input id="mMatTitulo" class="finput" placeholder="Ex: Apostila de Matéria" />
+     <input id="mNMTitulo" class="finput" placeholder="Ex: Apostila de Matéria" />
     </div>
     <div class="fg"><label class="fl">URL / Link</label>
-     <input id="mMatUrl" class="finput" placeholder="https://..." />
+     <input id="mNMUrl" class="finput" placeholder="https://..." />
     </div>
     <div class="fg"><label class="fl">Turma (deixe vazio para todas)</label>
-     <input id="mMatTurma" class="finput" placeholder="Ex: 9A ou vazio para todos" />
+     <input id="mNMTurma" class="finput" placeholder="Ex: 9A ou vazio para todos" />
     </div>
     <button onclick="tSaveNovoMaterial()" class="tbtn-primary" style="width:100%;margin-top:6px">💾 Salvar Material</button>
    </div>
@@ -8702,17 +8702,17 @@ async function _saveMateriais() {
 }
 
 function tOpenNovoMaterial() {
-  var f = ['mMatTopico','mMatTipo','mMatTitulo','mMatUrl','mMatTurma'];
-  f.forEach(function(id){ var el=document.getElementById(id); if(el) el.value = id==='mMatTipo'?'pdf':id==='mMatTopico'?'':''; });
+  var f = ['mNMTopico','mNMTipo','mNMTitulo','mNMUrl','mNMTurma'];
+  f.forEach(function(id){ var el=document.getElementById(id); if(el) el.value = id==='mNMTipo'?'pdf':id==='mNMTopico'?'':''; });
   tOpenModal('tModalNovoMaterial');
 }
 
 async function tSaveNovoMaterial() {
-  var titulo = (document.getElementById('mMatTitulo')?.value||'').trim();
-  var url    = (document.getElementById('mMatUrl')?.value||'').trim();
-  var topic  = document.getElementById('mMatTopico')?.value || '';
-  var tipo   = document.getElementById('mMatTipo')?.value || 'link';
-  var turma  = (document.getElementById('mMatTurma')?.value||'').trim();
+  var titulo = (document.getElementById('mNMTitulo')?.value||'').trim();
+  var url    = (document.getElementById('mNMUrl')?.value||'').trim();
+  var topic  = document.getElementById('mNMTopico')?.value || '';
+  var tipo   = document.getElementById('mNMTipo')?.value || 'link';
+  var turma  = (document.getElementById('mNMTurma')?.value||'').trim();
   if (!titulo) { showToast('Digite o título', 'err'); return; }
   if (!url)    { showToast('Digite a URL', 'err'); return; }
   await _loadMateriais();
