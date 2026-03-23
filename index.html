@@ -508,7 +508,7 @@ tr:hover td{background:#f8faff}
     'setBolDisc','setBolUnit','tShowModule','tOpenModal','tCloseModal',
     'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI','tOpenPEIForm',
     'tSaveAtividade','tSaveAviso','tShowAvisoDetalhe','tSendMsg',
-    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas','tOpenNovoMaterial','tSaveNovoMaterial','tDeleteMaterial','renderMateriaisTopico',
+    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas','tOpenNovoMaterial','tSaveNovoMaterial','tDeleteMaterial','renderMateriaisTopico','syncNotificacoesAntigos','abrirNotifTopico',
     'tGerarRelatorio','tSaveProfConfig','tSaveElevenLabs',
     'tElTestar','tElTesteDirecto','tElLimpar','tSaveMaterial',
     'tAbrirNovaTurma','tSalvarTurma','tSalvarPlano',
@@ -869,6 +869,7 @@ tr:hover td{background:#f8faff}
    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
     <button onclick="tOpenNovoExerc()" class="tbtn-primary">➕ Novo Exercício</button>
     <button onclick="tOpenNovoMaterial()" class="tbtn-primary" style="background:linear-gradient(135deg,#0e9f6e,#1a56db)">📎 Adicionar Material</button>
+    <button onclick="syncNotificacoesAntigos()" class="tbtn-primary" style="background:linear-gradient(135deg,#f59e0b,#ef4444)" title="Sincronizar materiais e exercícios antigos com notificações">🔔 Sincronizar Notificações</button>
     <select id="tExercTurmaFilter" class="tsearch" style="width:170px" onchange="tLoadExercicios()">
      <option value="">Todas as turmas</option>
     </select>
@@ -8785,6 +8786,33 @@ async function markNotifVista(topico) {
 window.checkNotificacoes=checkNotificacoes; window.renderNotifBadges=renderNotifBadges;
 window.renderNotifCard=renderNotifCard; window.markNotifVista=markNotifVista;
 
+async function syncNotificacoesAntigos() {
+  await _loadNotifDB();
+  await _loadMateriais();
+  await _loadExercDB();
+  var existingIds = {};
+  _notifDB.forEach(function(n){ if(n.srcId) existingIds[n.srcId]=true; });
+  var changed = false;
+  var base = Date.now();
+  _materiaisDB.forEach(function(m,i){
+    var sid = 'mat_'+m.id;
+    if(!existingIds[sid]){
+      _notifDB.push({id:base+i,srcId:sid,tipo:'material',topico:m.topic||'geral',titulo:m.titulo,turma:m.turma||'',criadoEm:m.id});
+      changed=true;
+    }
+  });
+  _exercDB.forEach(function(e,i){
+    var sid = 'ex_'+e.id;
+    if(!existingIds[sid]){
+      _notifDB.push({id:base+1000+i,srcId:sid,tipo:'exercicio',topico:e.topic,titulo:(e.q||'').substring(0,50),turma:'',criadoEm:e.id});
+      changed=true;
+    }
+  });
+  if(changed){ await _saveNotifDB(); showToast('✅ '+(_materiaisDB.length+_exercDB.length)+' item(s) sincronizados!','ok'); }
+  else { showToast('Tudo já sincronizado!','ok'); }
+}
+window.syncNotificacoesAntigos=syncNotificacoesAntigos;
+
 // ══════════════════════════════════════════
 // MATERIAIS POR TÓPICO (PROFESSOR + ALUNO)
 // ══════════════════════════════════════════
@@ -9274,7 +9302,7 @@ window._saveELConfigPermanent = _saveELConfigPermanent;
     'setBolDisc','setBolUnit','tShowModule','tOpenModal','tCloseModal',
     'tSaveAllNotas','tSaveFreq','tSetFreq','tSavePEI','tOpenPEIForm',
     'tSaveAtividade','tSaveAviso','tShowAvisoDetalhe','tSendMsg',
-    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas','tOpenNovoMaterial','tSaveNovoMaterial','tDeleteMaterial','renderMateriaisTopico',
+    'tLoadExercicios','tViewExercTopico','tViewRespostasAbertas','tOpenNovoMaterial','tSaveNovoMaterial','tDeleteMaterial','renderMateriaisTopico','syncNotificacoesAntigos','abrirNotifTopico',
     'tGerarRelatorio','tSaveProfConfig','tSaveElevenLabs',
     'tElTestar','tElTesteDirecto','tElLimpar','tSaveMaterial',
     'tAbrirNovaTurma','tSalvarTurma','tSalvarPlano',
