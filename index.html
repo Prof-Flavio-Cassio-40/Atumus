@@ -8734,6 +8734,15 @@ function renderNotifBadges() {
     } else { if(badge) badge.remove(); }
   });
 }
+function abrirNotifTopico(topico) {
+  toggleMode('turma');
+  setTimeout(function(){
+    var btn = document.querySelector('.tnav-btn[onclick*="' + topico + '"]');
+    showCS(topico, btn);
+  }, 200);
+}
+window.abrirNotifTopico = abrirNotifTopico;
+
 function renderNotifCard() {
   var div=document.getElementById('notifNewCard');
   if(!div) return;
@@ -8742,24 +8751,28 @@ function renderNotifCard() {
   var turmaAluno=CU.turma||'';
   var novas=_notifDB.filter(function(n){ return !seen[n.id]&&(!n.turma||n.turma===turmaAluno); });
   if(!novas.length){ div.innerHTML=''; return; }
-  div.innerHTML='<div style="background:linear-gradient(135deg,#fef3c7,#fef9ee);border:1.5px solid #f59e0b;border-radius:14px;padding:14px;margin-bottom:14px">'
+  var html='<div style="background:linear-gradient(135deg,#fef3c7,#fef9ee);border:1.5px solid #f59e0b;border-radius:14px;padding:14px;margin-bottom:14px">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
     +'<span style="font-size:1.2rem">🔔</span>'
     +'<span style="font-family:var(--fd);font-weight:800;font-size:.9rem;color:#92400e">Novidades do Professor</span>'
     +'<span style="background:#ef4444;color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:900;margin-left:auto">'+novas.length+' NOVO'+(novas.length>1?'S':'')+'</span>'
-    +'</div>'
-    +novas.slice(0,5).map(function(n){
-      var icon=n.tipo==='material'?'📎':'📝';
-      var lbl=(_QD_LABELS&&_QD_LABELS[n.topico])||n.topico;
-      var tipoLbl=n.tipo==='material'?'Material':'Exercício';
-      return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #fde68a">'
-        +'<span>'+icon+'</span>'
-        +'<div style="flex:1"><div style="font-weight:700;font-size:.82rem">'+n.titulo+'</div>'
-        +'<div style="font-size:.72rem;color:#92400e">'+tipoLbl+' · '+lbl+'</div></div>'
-        +'<button onclick="toggleMode(\'turma\');setTimeout(function(){showCS(\''+n.topico+'\',document.querySelector(\'.tnav-btn[onclick*=\\\"'+n.topico+'\\\"]\\'))},200)" style="background:#f59e0b;color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer">Ver →</button>'
-        +'</div>';
-    }).join('')
     +'</div>';
+  novas.slice(0,5).forEach(function(n){
+    var icon=n.tipo==='material'?'📎':'📝';
+    var lbl=(_QD_LABELS&&_QD_LABELS[n.topico])||n.topico;
+    var tipoLbl=n.tipo==='material'?'Material':'Exercício';
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #fde68a">'
+      +'<span>'+icon+'</span>'
+      +'<div style="flex:1"><div style="font-weight:700;font-size:.82rem">'+n.titulo+'</div>'
+      +'<div style="font-size:.72rem;color:#92400e">'+tipoLbl+' · '+lbl+'</div></div>'
+      +'<button data-notif-topico="'+n.topico+'" style="background:#f59e0b;color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer">Ver →</button>'
+      +'</div>';
+  });
+  html+='</div>';
+  div.innerHTML=html;
+  div.querySelectorAll('[data-notif-topico]').forEach(function(btn){
+    btn.addEventListener('click',function(){ abrirNotifTopico(btn.dataset.notifTopico); });
+  });
 }
 async function markNotifVista(topico) {
   if(!CU||CU.role!=='aluno') return;
