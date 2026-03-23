@@ -8355,16 +8355,13 @@ function typeCW(l){
   if(!selCWC)return;
   selCWC.textContent=l;
   selCWC.classList.remove('ok','err');
-  selCWC.style.background='#ede9fe';selCWC.style.borderColor='#7c3aed';selCWC.style.color='#4c1d95';
+  // Mantém o destaque azul na célula selecionada após digitar
+  selCWC.style.background='#ede9fe';
+  selCWC.style.borderColor='#7c3aed';
+  selCWC.style.color='#4c1d95';
+  selCWC.style.outline='4px solid #7c3aed';
+  selCWC.style.boxShadow='0 0 14px 4px rgba(124,58,237,.35)';
   spk('Letra ' + l + '!');
-  // Avança para próxima célula automaticamente
-  var cs=Array.from(document.querySelectorAll('.cw-cell.ac'));
-  var idx=cs.indexOf(selCWC);
-  if(idx<cs.length-1){
-    setTimeout(function(){selCW(cs[idx+1]);},300);
-  } else {
-    spk('Você preencheu todas as letras! Clique em Verificar para conferir!');
-  }
 }
 async function checkCW(){
   var ans=window._cwa;if(!ans)return;
