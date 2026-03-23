@@ -864,9 +864,10 @@ tr:hover td{background:#f8faff}
   <div class="tmod" id="tExercicios">
    <div class="tmod-title">📝 Exercícios de Turma</div>
    <div style="background:var(--pl);border-radius:12px;padding:11px 15px;margin-bottom:16px;border:1.5px solid var(--p);font-size:.81rem;color:var(--pd)">
-    <strong>📚 Banco de Exercícios ÁTUMUS:</strong> Questões abertas e fechadas organizadas por tópico. Acompanhe o progresso e revise as respostas abertas dos alunos.
+    <strong>📚 Banco de Exercícios ÁTUMUS:</strong> Questões abertas e fechadas organizadas por tópico. Os exercícios criados aqui aparecem também no <strong>Modo Inclusivo AEE</strong> com voz e botões adaptados.
    </div>
    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+    <button onclick="tOpenNovoExerc()" class="tbtn-primary">➕ Novo Exercício</button>
     <select id="tExercTurmaFilter" class="tsearch" style="width:170px" onchange="tLoadExercicios()">
      <option value="">Todas as turmas</option>
     </select>
@@ -1197,6 +1198,49 @@ tr:hover td{background:#f8faff}
   <div class="tmodal-box" style="max-width:560px">
    <div class="tmodal-hdr" id="tModalAvisoHdr">📢 Aviso <button class="tmodal-close" onclick="tCloseModal('tModalAvisoDetalhe')">✕</button></div>
    <div class="tmodal-body" id="tModalAvisoBody"></div>
+  </div>
+ </div>
+
+ <!-- Modal Novo Exercício -->
+ <div class="tmodal" id="tModalNovoExerc">
+  <div class="tmodal-box">
+   <div class="tmodal-hdr"><span>➕</span> Novo Exercício <button class="tmodal-close" onclick="tCloseModal('tModalNovoExerc')">✕</button></div>
+   <div class="tmodal-body">
+    <div class="fg"><label class="fl">Tópico</label>
+     <select class="fi" id="mExercTopico">
+      <option value="materia">🧪 Matéria e Propriedades</option>
+      <option value="substancias">🔬 Substâncias e Misturas</option>
+      <option value="modelos">⚛️ Modelos Atômicos</option>
+      <option value="estrutura">🌀 Estrutura Atômica</option>
+      <option value="radio">☢️ Radioatividade</option>
+      <option value="ligacoes">🔗 Ligações Químicas</option>
+     </select>
+    </div>
+    <div class="fg"><label class="fl">Tipo de questão</label>
+     <select class="fi" id="mExercTipo" onchange="tToggleExercTipo()">
+      <option value="mc">🔵 Fechada (múltipla escolha)</option>
+      <option value="open">📝 Aberta (dissertativa)</option>
+     </select>
+    </div>
+    <div class="fg"><label class="fl">Enunciado da questão</label><textarea class="fi" id="mExercQ" rows="3" placeholder="Digite a pergunta..."></textarea></div>
+    <div id="mExercMcArea">
+     <div class="fg"><label class="fl">Opções de resposta</label>
+      <div id="mExercOpts">
+       <div style="display:flex;gap:6px;margin-bottom:6px"><span style="width:22px;height:22px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0">A</span><input class="fi" style="margin:0;flex:1" placeholder="Opção A" id="mOpt0"></div>
+       <div style="display:flex;gap:6px;margin-bottom:6px"><span style="width:22px;height:22px;border-radius:50%;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0">B</span><input class="fi" style="margin:0;flex:1" placeholder="Opção B" id="mOpt1"></div>
+       <div style="display:flex;gap:6px;margin-bottom:6px"><span style="width:22px;height:22px;border-radius:50%;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0">C</span><input class="fi" style="margin:0;flex:1" placeholder="Opção C" id="mOpt2"></div>
+       <div style="display:flex;gap:6px;margin-bottom:6px"><span style="width:22px;height:22px;border-radius:50%;background:#10b981;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0">D</span><input class="fi" style="margin:0;flex:1" placeholder="Opção D (opcional)" id="mOpt3"></div>
+      </div>
+     </div>
+     <div class="fg"><label class="fl">Alternativa correta</label>
+      <select class="fi" id="mExercCorreta">
+       <option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option>
+      </select>
+     </div>
+    </div>
+    <div class="fg"><label class="fl">Gabarito / Feedback</label><textarea class="fi" id="mExercFb" rows="2" placeholder="Explicação da resposta correta..."></textarea></div>
+    <button onclick="tSaveNovoExerc()" class="tbtn-primary" style="width:100%">✓ Salvar Exercício</button>
+   </div>
   </div>
  </div>
 
@@ -1583,6 +1627,7 @@ tr:hover td{background:#f8faff}
      <div class="pcd-ac" onclick="showPA('pin')"><div class="pcd-ac-icon">🎨</div><div class="pcd-ac-title">Pintar o Átomo</div><div class="pcd-ac-desc">Identifique as partes</div></div>
      <div class="pcd-ac" onclick="showPA('cruz')"><div class="pcd-ac-icon">📝</div><div class="pcd-ac-title">Cruzadinha</div><div class="pcd-ac-desc">Palavras cruzadas</div></div>
      <div class="pcd-ac" onclick="showPA('aud')"><div class="pcd-ac-icon">🔊</div><div class="pcd-ac-title">Ouvir e Aprender</div><div class="pcd-ac-desc">Imagens + narração</div></div>
+     <div class="pcd-ac" onclick="showPA('exercaee')"><div class="pcd-ac-icon">✏️</div><div class="pcd-ac-title">Questões AEE</div><div class="pcd-ac-desc">Exercícios com voz adaptada</div></div>
     </div>
    </div>
    <!-- TUTORIAL -->
@@ -1605,6 +1650,13 @@ tr:hover td{background:#f8faff}
     <div class="aud-card"><div class="aud-img">🔵</div><div class="aud-body"><div class="aud-title">O que é Elétron?</div><div class="aud-text">O elétron tem carga negativa e orbita o núcleo. Átomo que perde elétrons vira cátion. Que ganha, vira ânion.</div><button class="abtn" id="ab3" onclick="playAud('O elétron tem carga negativa e orbita o núcleo. Átomo que perde elétrons vira cátion. Que ganha, vira ânion.','ab3')">🔊 Ouvir</button></div></div>
     <div class="aud-card"><div class="aud-img">☢️</div><div class="aud-body"><div class="aud-title">O que é Radioatividade?</div><div class="aud-text">Radioatividade é quando um átomo instável libera energia ao se transformar. A meia-vida é o tempo para metade dos átomos se desintegrarem.</div><button class="abtn" id="ab4" onclick="playAud('Radioatividade é quando um átomo instável libera energia ao se transformar. A meia-vida é o tempo para metade dos átomos se desintegrarem.','ab4')">🔊 Ouvir</button></div></div>
     <div class="aud-card"><div class="aud-img">🔗</div><div class="aud-body"><div class="aud-title">Ligações Químicas</div><div class="aud-text">As ligações unem átomos. A ligação iônica transfere elétrons. A covalente compartilha elétrons entre os átomos.</div><button class="abtn" id="ab5" onclick="playAud('As ligações químicas unem átomos. A ligação iônica transfere elétrons. A covalente compartilha elétrons entre os átomos.','ab5')">🔊 Ouvir</button></div></div>
+   </div>
+   <!-- QUESTÕES AEE -->
+   <div class="pcd-area" id="pa-exercaee">
+    <button class="backbtn" onclick="backPCD()">← Voltar</button>
+    <div class="pcd-big">✏️ Questões AEE</div>
+    <div id="aee-topicos" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;justify-content:center"></div>
+    <div id="aee-exerc-body"></div>
    </div>
   </di
 
@@ -4048,7 +4100,7 @@ function finQ(t,qi){var q=QD[t][qi];if(q.type==='open'){var ta=document.getEleme
 async function showQzRes(topic){var qs=QD[topic];var st=qzState[topic];var mcQ=qs.filter(q=>q.type==='mc');ok=0;mcQ.forEach(q=>{var ri=qs.indexOf(q);if(st.ans[ri]===q.c)ok++;});var tot=mcQ.length;var score=tot?Math.round((ok/tot)*100):100;var c=document.getElementById('qz-'+topic);var review=qs.map((q,i)=>{if(q.type==='open')return`<div class="ri ri-open"><strong>❓ ${q.q}</strong><br><em>Sua resposta:</em> ${st.ans[i]||'(não respondida)'}<br><span style="color:#92400e">💡 ${q.fb}</span></div>`;var isOk=st.ans[i]===q.c;return`<div class="ri ${isOk?'ri-ok':'ri-ng'}"><strong>${isOk?'✅':'❌'} ${q.q}</strong><br>Sua: ${q.opts[st.ans[i]]??'(não respondida)'}<br>${!isOk?`Correta: ${q.opts[q.c]}<br>`:''}<em>💡 ${q.fb}</em></div>`;}).join('');c.innerHTML=`<div class="qres"><div class="qscore">${score}%</div><div style="font-size:.86rem;color:var(--mu);margin-bottom:14px">${ok} de ${tot} questões objetivas</div><div class="qreview">${review}</div><button onclick="qzState['${topic}']={ans:{},done:false};renderQz('${topic}',0)" style="margin-top:13px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">🔄 Refazer</button></div>`;if(CU){if(!CU.quizAnswers)CU.quizAnswers={};CU.quizAnswers[topic]=Object.assign({},st.ans);CU=await updProg(CU.username,topic,score>=50)||CU;await svu(CU);updateStats();}}
 
 // ── PCD ──
-function showPA(id){document.getElementById('pcd-menu').style.display='none';document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pa-'+id)?.classList.add('active');if(id==='cruz')initCW();if(id==='lig')initLig();if(id==='tut')initTut();}
+function showPA(id){document.getElementById('pcd-menu').style.display='none';document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pa-'+id)?.classList.add('active');if(id==='cruz')initCW();if(id==='lig')initLig();if(id==='tut')initTut();if(id==='exercaee')initAEEExerc();}
 function backPCD(){document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pcd-menu').style.display='block';window.speechSynthesis?.cancel();}
 var tutSteps=[{ic:'👋',t:'Bem-vindo ao ÁTUMUS!',tx:'O ÁTUMUS é o seu app de Ciências. Aqui você vai estudar, fazer atividades e aprender!'},{ic:'📚',t:'Modo Turma',tx:'No Modo Turma você estuda o conteúdo e responde questionários. Veja o resultado ao final!'},{ic:'♿',t:'Modo Inclusivo',tx:'O Modo Inclusivo tem atividades especiais: ligue os pontos, pinte o átomo, cruzadinha e mais!'},{ic:'🔊',t:'Voz do App',tx:'O app fala com você! A voz é definida pelo seu cadastro. Pode alterar quando quiser.'},{ic:'⭐',t:'Pontos e Conquistas',tx:'Cada atividade que você faz dá pontos. Colecione conquistas!'},{ic:'🎉',t:'Pronto!',tx:'Você está pronto! Escolha uma atividade e bons estudos!'}];
 var tutIdx=0;
@@ -8094,7 +8146,7 @@ function finQ(t,qi){var q=QD[t][qi];if(q.type==='open'){var ta=document.getEleme
 async function showQzRes(topic){var qs=QD[topic];var st=qzState[topic];var mcQ=qs.filter(q=>q.type==='mc');var ok=0;mcQ.forEach(q=>{var ri=qs.indexOf(q);if(st.ans[ri]===q.c)ok++;});var tot=mcQ.length;var score=tot?Math.round((ok/tot)*100):100;var c=document.getElementById('qz-'+topic);var review=qs.map((q,i)=>{if(q.type==='open')return`<div class="ri ri-open"><strong>❓ ${q.q}</strong><br><em>Sua resposta:</em> ${st.ans[i]||'(não respondida)'}<br><span style="color:#92400e">💡 ${q.fb}</span></div>`;var isOk=st.ans[i]===q.c;return`<div class="ri ${isOk?'ri-ok':'ri-ng'}"><strong>${isOk?'✅':'❌'} ${q.q}</strong><br>Sua: ${q.opts[st.ans[i]]??'(não respondida)'}<br>${!isOk?`Correta: ${q.opts[q.c]}<br>`:''}<em>💡 ${q.fb}</em></div>`;}).join('');c.innerHTML=`<div class="qres"><div class="qscore">${score}%</div><div style="font-size:.86rem;color:var(--mu);margin-bottom:14px">${ok} de ${tot} questões objetivas</div><div class="qreview">${review}</div><button onclick="qzState['${topic}']={ans:{},done:false};renderQz('${topic}',0)" style="margin-top:13px;background:var(--p);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:700;cursor:pointer">🔄 Refazer</button></div>`;if(CU){if(!CU.quizAnswers)CU.quizAnswers={};CU.quizAnswers[topic]=Object.assign({},st.ans);CU=await updProg(CU.username,topic,score>=50)||CU;await svu(CU);updateStats();}}
 
 // ── PCD ──
-function showPA(id){document.getElementById('pcd-menu').style.display='none';document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pa-'+id)?.classList.add('active');if(id==='cruz')initCW();if(id==='lig')initLig();if(id==='tut')initTut();}
+function showPA(id){document.getElementById('pcd-menu').style.display='none';document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pa-'+id)?.classList.add('active');if(id==='cruz')initCW();if(id==='lig')initLig();if(id==='tut')initTut();if(id==='exercaee')initAEEExerc();}
 function backPCD(){document.querySelectorAll('.pcd-area').forEach(a=>a.classList.remove('active'));document.getElementById('pcd-menu').style.display='block';window.speechSynthesis?.cancel();}
 tutSteps=[{ic:'👋',t:'Bem-vindo ao ÁTUMUS!',tx:'O ÁTUMUS é o seu app de Ciências. Aqui você vai estudar, fazer atividades e aprender!'},{ic:'📚',t:'Modo Turma',tx:'No Modo Turma você estuda o conteúdo e responde questionários. Veja o resultado ao final!'},{ic:'♿',t:'Modo Inclusivo',tx:'O Modo Inclusivo tem atividades especiais: ligue os pontos, pinte o átomo, cruzadinha e mais!'},{ic:'🔊',t:'Voz do App',tx:'O app fala com você! A voz é definida pelo seu cadastro. Pode alterar quando quiser.'},{ic:'⭐',t:'Pontos e Conquistas',tx:'Cada atividade que você faz dá pontos. Colecione conquistas!'},{ic:'🎉',t:'Pronto!',tx:'Você está pronto! Escolha uma atividade e bons estudos!'}];
 tutIdx=0;
@@ -8525,6 +8577,165 @@ window.tUpdProfPhoto = tUpdProfPhoto; window.tSaveElevenLabs = tSaveElevenLabs;
 window._showCloudConfig = _showCloudConfig; window._doSbSave = _doSbSave; window._sbDisconnect = _sbDisconnect;
 window._cfgTab = _cfgTab;
 
+
+// ══════════════════════════════════════════
+// CRIAÇÃO DE EXERCÍCIOS (PROFESSOR)
+// ══════════════════════════════════════════
+var _exercDB = [];
+
+async function _loadExercDB() {
+  var entry = await gtu('__exercicios__');
+  _exercDB = (entry && entry.lista) ? entry.lista : [];
+}
+async function _saveExercDB() {
+  await svu({ username:'__exercicios__', role:'system', lista: _exercDB });
+}
+function getMergedExerc(topic) {
+  var base = (typeof QD !== 'undefined' && QD[topic]) ? QD[topic].slice() : [];
+  var extra = _exercDB.filter(function(e){ return e.topic === topic; });
+  return base.concat(extra);
+}
+function tOpenNovoExerc() {
+  var fields = ['mExercQ','mExercFb','mOpt0','mOpt1','mOpt2','mOpt3'];
+  fields.forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  var t = document.getElementById('mExercTipo'); if(t) t.value='mc';
+  var mc = document.getElementById('mExercMcArea'); if(mc) mc.style.display='block';
+  tOpenModal('tModalNovoExerc');
+}
+function tToggleExercTipo() {
+  var tipo = document.getElementById('mExercTipo')?.value;
+  var mc = document.getElementById('mExercMcArea');
+  if (mc) mc.style.display = tipo==='mc' ? 'block' : 'none';
+}
+async function tSaveNovoExerc() {
+  var topic = document.getElementById('mExercTopico')?.value;
+  var tipo  = document.getElementById('mExercTipo')?.value;
+  var q     = (document.getElementById('mExercQ')?.value||'').trim();
+  var fb    = (document.getElementById('mExercFb')?.value||'').trim();
+  if (!q) { showToast('Digite o enunciado', 'err'); return; }
+  var exerc = { id: Date.now(), topic: topic, type: tipo, q: q, fb: fb };
+  if (tipo === 'mc') {
+    var opts = ['mOpt0','mOpt1','mOpt2','mOpt3'].map(function(id){
+      return (document.getElementById(id)?.value||'').trim();
+    }).filter(function(o){ return o; });
+    if (opts.length < 2) { showToast('Adicione pelo menos 2 opções', 'err'); return; }
+    exerc.opts = opts;
+    exerc.c = parseInt(document.getElementById('mExercCorreta')?.value||'0');
+  }
+  await _loadExercDB();
+  _exercDB.push(exerc);
+  await _saveExercDB();
+  tCloseModal('tModalNovoExerc');
+  tLoadExercicios();
+  showToast('✅ Exercício salvo!', 'ok');
+}
+async function tDeleteExerc(id) {
+  await _loadExercDB();
+  _exercDB = _exercDB.filter(function(e){ return e.id !== id; });
+  await _saveExercDB();
+  tLoadExercicios();
+  showToast('Exercício removido', 'ok');
+}
+window.tOpenNovoExerc = tOpenNovoExerc;
+window.tToggleExercTipo = tToggleExercTipo;
+window.tSaveNovoExerc = tSaveNovoExerc;
+window.tDeleteExerc = tDeleteExerc;
+window.getMergedExerc = getMergedExerc;
+
+// ══════════════════════════════════════════
+// EXERCÍCIOS AEE (MODO INCLUSIVO)
+// ══════════════════════════════════════════
+var _aeeCurTopic = '';
+var _aeeCurIdx = 0;
+var _aeeAns = {};
+var _aeeColors2 = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#06b6d4'];
+var _aeeTopicLabels2 = {materia:'🧪 Matéria',substancias:'🔬 Substâncias',modelos:'⚛️ Modelos',estrutura:'🌀 Estrutura',radio:'☢️ Radioatividade',ligacoes:'🔗 Ligações'};
+
+async function initAEEExerc() {
+  await _loadExercDB();
+  var topDiv = document.getElementById('aee-topicos');
+  if (!topDiv) return;
+  var topics = Object.keys(_aeeTopicLabels2);
+  topDiv.innerHTML = topics.map(function(t,i) {
+    var n = getMergedExerc(t).length;
+    return '<button onclick="aeeSelectTopico(\''+t+'\')" style="background:'+_aeeColors2[i%_aeeColors2.length]+';color:#fff;border:none;border-radius:12px;padding:10px 16px;font-family:Nunito,sans-serif;font-weight:800;font-size:.82rem;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.15);line-height:1.4">'+_aeeTopicLabels2[t]+'<br><span style="font-size:.68rem;opacity:.85">'+n+' questões</span></button>';
+  }).join('');
+  document.getElementById('aee-exerc-body').innerHTML = '<div style="text-align:center;color:var(--mu);padding:24px;font-size:.9rem">👆 Escolha um tópico para começar!</div>';
+  spk('Questões adaptadas para você! Escolha um tópico para começar.');
+}
+
+async function aeeSelectTopico(topic) {
+  await _loadExercDB();
+  _aeeCurTopic = topic; _aeeCurIdx = 0; _aeeAns = {};
+  renderAEEExerc();
+  spk('Tópico ' + (_aeeTopicLabels2[topic]||topic) + '. Vamos lá!');
+}
+
+function renderAEEExerc() {
+  var body = document.getElementById('aee-exerc-body'); if(!body) return;
+  var qs = getMergedExerc(_aeeCurTopic);
+  if (!qs.length) { body.innerHTML='<div style="text-align:center;padding:24px;color:var(--mu)">Nenhuma questão neste tópico ainda.</div>'; return; }
+  if (_aeeCurIdx >= qs.length) { aeeShowResult(); return; }
+  var q = qs[_aeeCurIdx]; var tot = qs.length;
+  var pct = Math.round((_aeeCurIdx/tot)*100);
+  var color = _aeeColors2[_aeeCurIdx%_aeeColors2.length];
+  var html = '<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:.73rem;color:var(--mu);margin-bottom:5px"><span>Questão '+(_aeeCurIdx+1)+' de '+tot+'</span><span>'+pct+'%</span></div><div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden"><div style="height:100%;background:'+color+';width:'+pct+'%;border-radius:4px"></div></div></div>'
+    +'<div style="display:inline-block;background:'+(q.type==='mc'?'#dbeafe':'#dcfce7')+';color:'+(q.type==='mc'?'#1d4ed8':'#15803d')+';border-radius:20px;padding:3px 11px;font-size:.7rem;font-weight:800;margin-bottom:10px">'+(q.type==='mc'?'🔵 Fechada':'📝 Aberta')+'</div>'
+    +'<div style="background:'+color+'18;border:2px solid '+color+'44;border-radius:16px;padding:16px 15px;margin-bottom:16px"><div style="font-size:1.02rem;font-weight:800;color:var(--tx);line-height:1.5">'+q.q+'</div>'
+    +'<button onclick="spk(\''+q.q.replace(/['"]/g,' ')+'\')" style="margin-top:10px;background:'+color+';color:#fff;border:none;border-radius:10px;padding:8px 14px;font-family:Nunito,sans-serif;font-weight:800;cursor:pointer;font-size:.82rem">🔊 Ouvir Pergunta</button></div>';
+  if (q.type==='mc' && q.opts) {
+    var optColors=['#3b82f6','#8b5cf6','#f97316','#10b981'];
+    var optLetters=['A','B','C','D'];
+    html += '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">';
+    q.opts.forEach(function(opt,oi){
+      var sel=_aeeAns[_aeeCurIdx]===oi; var oc=optColors[oi%optColors.length];
+      html+='<button onclick="aeeSelAns('+oi+')" style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-radius:14px;border:2.5px solid '+(sel?oc:'#e2e8f0')+';background:'+(sel?oc+'20':'#fff')+';cursor:pointer;text-align:left;font-family:Nunito,sans-serif;width:100%">'
+        +'<span style="width:32px;height:32px;border-radius:50%;background:'+(sel?oc:'#f1f5f9')+';color:'+(sel?'#fff':oc)+';font-weight:900;font-size:.88rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+optLetters[oi]+'</span>'
+        +'<span style="font-size:.9rem;font-weight:700;color:'+(sel?oc:'var(--tx)')+';flex:1">'+opt+'</span>'
+        +'<span onclick="event.stopPropagation();spk(\''+opt.replace(/['"]/g,' ')+'\')" style="padding:5px 9px;border:1.5px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:.78rem">🔊</span>'
+        +'</button>';
+    });
+    html += '</div>';
+  } else {
+    html += '<textarea id="aee-open-ans" rows="4" placeholder="Escreva sua resposta aqui..." style="width:100%;border:2px solid #e2e8f0;border-radius:12px;padding:12px;font-family:Nunito,sans-serif;font-size:.9rem;resize:vertical;box-sizing:border-box;margin-bottom:16px">'+(typeof _aeeAns[_aeeCurIdx]==='string'?_aeeAns[_aeeCurIdx]:'')+'</textarea>';
+  }
+  var isLast=(_aeeCurIdx===tot-1);
+  html+='<div style="display:flex;gap:10px">';
+  if(_aeeCurIdx>0) html+='<button onclick="aeePrevQ()" style="flex:1;padding:14px;border-radius:12px;border:2px solid #e2e8f0;background:#fff;font-family:Nunito,sans-serif;font-weight:800;cursor:pointer;font-size:.88rem">← Anterior</button>';
+  html+='<button onclick="aeeNextQ()" style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(isLast?'#10b981':color)+';color:#fff;font-family:Nunito,sans-serif;font-weight:800;cursor:pointer;font-size:.9rem">'+(isLast?'✓ Ver Resultado':'Próxima →')+'</button></div>';
+  body.innerHTML=html;
+  setTimeout(function(){ spk(q.q); }, 500);
+}
+
+function aeeSelAns(oi){ _aeeAns[_aeeCurIdx]=oi; renderAEEExerc(); }
+function aeePrevQ(){ var ta=document.getElementById('aee-open-ans'); if(ta)_aeeAns[_aeeCurIdx]=ta.value; _aeeCurIdx=Math.max(0,_aeeCurIdx-1); renderAEEExerc(); }
+function aeeNextQ(){ var ta=document.getElementById('aee-open-ans'); if(ta)_aeeAns[_aeeCurIdx]=ta.value; var qs=getMergedExerc(_aeeCurTopic); var q=qs[_aeeCurIdx]; if(q.type==='mc'&&_aeeAns[_aeeCurIdx]===undefined){spk('Por favor, escolha uma resposta!');return;} _aeeCurIdx++; renderAEEExerc(); }
+
+async function aeeShowResult() {
+  var body=document.getElementById('aee-exerc-body'); if(!body) return;
+  var qs=getMergedExerc(_aeeCurTopic);
+  var ok=0; qs.forEach(function(q,qi){if(q.type==='mc'&&_aeeAns[qi]===q.c)ok++;});
+  var mcQs=qs.filter(function(q){return q.type==='mc';}); var tot=mcQs.length;
+  var pct=tot?Math.round((ok/tot)*100):100;
+  var col=pct>=70?'#10b981':pct>=40?'#f59e0b':'#ef4444';
+  var msg=pct>=70?'Excelente! Você foi muito bem!':pct>=40?'Bom trabalho! Continue praticando!':'Continue tentando, você consegue!';
+  var review=qs.map(function(q,qi){
+    if(q.type==='open'){return '<div style="background:#f0fdf4;border-radius:12px;padding:12px;margin-bottom:10px;border-left:4px solid #22c55e"><div style="font-weight:800;font-size:.82rem;margin-bottom:5px">📝 '+q.q+'</div><div style="font-size:.8rem;color:#475569;margin-bottom:6px">Sua resposta: <em>'+(_aeeAns[qi]||'(não respondida)')+'</em></div><div style="font-size:.75rem;color:#15803d;background:#dcfce7;border-radius:6px;padding:5px 9px;margin-bottom:6px">💡 '+q.fb+'</div><button onclick="spk(\''+q.fb.replace(/['"]/g,' ')+'\')" style="background:#22c55e;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;cursor:pointer">🔊 Ouvir Gabarito</button></div>';}
+    var isOk=_aeeAns[qi]===q.c;
+    return '<div style="background:'+(isOk?'#f0fdf4':'#fef2f2')+';border-radius:12px;padding:12px;margin-bottom:10px;border-left:4px solid '+(isOk?'#22c55e':'#ef4444')+'"><div style="font-weight:800;font-size:.82rem;margin-bottom:5px">'+(isOk?'✅':'❌')+' '+q.q+'</div>'+(isOk?'':'<div style="font-size:.78rem;color:#dc2626;margin-bottom:3px">Sua: '+(q.opts&&q.opts[_aeeAns[qi]]?q.opts[_aeeAns[qi]]:'(não respondida)')+'</div>')+(isOk?'':'<div style="font-size:.78rem;color:#15803d;margin-bottom:5px">Correta: '+(q.opts?q.opts[q.c]:'')+'</div>')+'<div style="font-size:.75rem;color:#475569;background:#f8fafc;border-radius:6px;padding:5px 9px;margin-bottom:6px">💡 '+q.fb+'</div><button onclick="spk(\''+q.fb.replace(/['"]/g,' ')+'\')" style="background:'+(isOk?'#22c55e':'#ef4444')+';color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:800;cursor:pointer">🔊 Ouvir Explicação</button></div>';
+  }).join('');
+  body.innerHTML='<div style="text-align:center;margin-bottom:18px"><div style="font-family:Sora,sans-serif;font-size:2.5rem;font-weight:900;color:'+col+'">'+pct+'%</div><div style="font-size:.82rem;color:var(--mu);margin-bottom:4px">'+ok+' de '+tot+' fechadas corretas</div><div style="font-size:.92rem;font-weight:800;color:'+col+'">'+msg+'</div><button onclick="spk(\''+msg+'. Você acertou '+ok+' de '+tot+' questões.\')" style="margin-top:10px;background:'+col+';color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:Nunito,sans-serif;font-weight:800;cursor:pointer">🔊 Ouvir Resultado</button></div><div>'+review+'</div><button onclick="aeeSelectTopico(\''+_aeeCurTopic+'\')" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--v);color:#fff;font-family:Nunito,sans-serif;font-weight:800;cursor:pointer;margin-top:14px">🔄 Refazer</button><button onclick="initAEEExerc()" style="width:100%;padding:12px;border-radius:12px;border:2px solid var(--v);background:#fff;color:var(--v);font-family:Nunito,sans-serif;font-weight:800;cursor:pointer;margin-top:8px">← Outros tópicos</button>';
+  spk(msg+' Você acertou '+ok+' de '+tot+' questões.');
+  if(CU){if(!CU.quizAnswers)CU.quizAnswers={};CU.quizAnswers[_aeeCurTopic+'_aee']=_aeeAns;await svu(CU);}
+}
+
+window.initAEEExerc = initAEEExerc;
+window.aeeSelectTopico = aeeSelectTopico;
+window.renderAEEExerc = renderAEEExerc;
+window.aeeSelAns = aeeSelAns;
+window.aeePrevQ = aeePrevQ;
+window.aeeNextQ = aeeNextQ;
+window.aeeShowResult = aeeShowResult;
 
 // ══════════════════════════════════════════
 // PLANEJAMENTO COM BNCC
